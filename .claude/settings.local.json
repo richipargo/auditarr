@@ -8,7 +8,9 @@
       "WebFetch(domain:ui.nuxt.com)",
       "Bash(/Users/richipargo/Projects/auditarr/app/pages/messages.vue:*)",
       "Bash(npm run test:api:*)",
-      "Bash(npm test:*)"
+      "Bash(npm test:*)",
+      "Bash(chmod:*)",
+      "Bash(docker build:*)"
     ]
   }
 }

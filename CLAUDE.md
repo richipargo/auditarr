@@ -52,6 +52,24 @@ npm run db:seed          # Seed database with example Sonarr/Radarr messages
 npm run db:seed:random   # Generate random test data using drizzle-seed
 ```
 
+## Docker Deployment
+
+See [DOCKER.md](./DOCKER.md) for detailed deployment guide.
+
+```bash
+# Quick start with Docker Compose
+docker-compose up -d
+
+# Build and run manually
+docker build -t auditarr .
+docker run -d -p 3000:3000 -v $(pwd)/data:/data auditarr
+```
+
+**Database Path:**
+- Default development: `./data/auditarr.db`
+- Docker container: `/data/auditarr.db` (mounted volume)
+- Configurable via `DB_PATH` environment variable
+
 ## Architecture
 
 ### Nuxt 4 Structure
@@ -68,11 +86,12 @@ npm run db:seed:random   # Generate random test data using drizzle-seed
 
 **Drizzle ORM Configuration:**
 - Uses Drizzle ORM v0.45.1 with better-sqlite3 driver
-- Database file: `auditarr.db` in project root
+- Database file: `./data/auditarr.db` (configurable via `DB_PATH` env var)
 - Schema defined in `server/db/schema.ts`
 - Database connection in `server/db/index.ts`
 - WAL mode enabled for better concurrent access
 - Migrations stored in `server/db/migrations/`
+- Data directory automatically created if it doesn't exist
 
 **Schema (server/db/schema.ts):**
 - Table: `messages` with columns:

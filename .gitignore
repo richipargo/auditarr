@@ -26,6 +26,9 @@ logs
 # Test coverage
 coverage/
 
+# Database files
+.claude/
+data/
 *.db
 *.db-wal
 *.db-whl

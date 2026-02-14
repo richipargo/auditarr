@@ -4,6 +4,10 @@ import { defineVitestProject } from '@nuxt/test-utils/config'
 
 export default defineConfig({
   test: {
+    // Use test database for all tests
+    env: {
+      DB_PATH: './data/auditarr.test.db'
+    },
     projects: [
       {
         test: {
