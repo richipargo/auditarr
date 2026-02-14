@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "WebSearch",
+      "WebFetch(domain:docs.ntfy.sh)",
+      "WebFetch(domain:github.com)",
+      "Bash(npm view:*)",
+      "WebFetch(domain:ui.nuxt.com)",
+      "Bash(/Users/richipargo/Projects/auditarr/app/pages/messages.vue:*)",
+      "Bash(npm run test:api:*)",
+      "Bash(npm test:*)"
+    ]
+  }
+}

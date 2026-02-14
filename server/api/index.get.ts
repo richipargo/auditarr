@@ -1,7 +1,7 @@
 import { getAllTopics } from '../utils/database';
 
 export default defineEventHandler(async (event) => {
-  return new Promise((resolve, reject) => {
+  return new Promise((resolve, _reject) => {
     getAllTopics((err, topics) => {
       if (err) {
         console.error('Error retrieving topics:', err);

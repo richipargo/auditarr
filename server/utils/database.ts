@@ -1,132 +1,149 @@
-import sqlite3 from 'sqlite3';
-import { join } from 'path';
+import { db } from '../db'
+import { messages } from '../db/schema'
+import { eq, desc, and, or, like, gte, lte } from 'drizzle-orm'
 
-// Database file path
-const DB_PATH = join(process.cwd(), 'auditarr.db');
+// Message metadata interface matching ntfy.sh format
+export interface MessageMetadata {
+  title?: string
+  priority?: number
+  tags?: string[]
+  click?: string
+  icon?: string
+  actions?: any[]
+}
 
-// Initialize database connection
-const db = new sqlite3.Database(DB_PATH, (err) => {
-  if (err) {
-    console.error('Error opening database:', err.message);
-  } else {
-    console.log('Connected to SQLite database');
-    initializeDatabase();
+// Generate unique message ID
+function generateMessageId(): string {
+  return Date.now().toString() + '-' + Math.random().toString(36).substring(2, 8)
+}
+
+// Save a message to the database
+export async function saveMessage(
+  topic: string,
+  message: string,
+  metadata: MessageMetadata = {}
+): Promise<any> {
+  const messageId = generateMessageId()
+  const time = new Date().toISOString()
+
+  // Serialize arrays/objects to JSON strings for storage
+  const tagsStr = metadata.tags ? JSON.stringify(metadata.tags) : null
+  const actionsStr = metadata.actions ? JSON.stringify(metadata.actions) : null
+
+  const [inserted] = await db.insert(messages).values({
+    messageId,
+    topic,
+    message,
+    title: metadata.title || null,
+    priority: metadata.priority || 3,
+    tags: tagsStr,
+    click: metadata.click || null,
+    icon: metadata.icon || null,
+    actions: actionsStr,
+    event: 'message',
+    createdAt: time
+  }).returning()
+
+  console.log(`✅ Message saved to database with ID: ${inserted.id}`)
+
+  return {
+    id: inserted.messageId,
+    time: inserted.createdAt,
+    topic: inserted.topic,
+    message: inserted.message,
+    title: inserted.title || undefined,
+    priority: inserted.priority,
+    tags: metadata.tags,
+    click: inserted.click || undefined,
+    icon: inserted.icon || undefined,
+    actions: metadata.actions,
+    event: inserted.event
   }
-});
+}
 
-function initializeDatabase() {
-  db.serialize(() => {
-    // Create messages table if it doesn't exist
-    db.run(`
-      CREATE TABLE IF NOT EXISTS messages (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        message_id TEXT NOT NULL,
-        topic TEXT NOT NULL,
-        message TEXT NOT NULL,
-        event TEXT DEFAULT 'message',
-        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-        UNIQUE(message_id)
+// Parse message from database row
+function parseMessage(row: any) {
+  return {
+    id: row.messageId,
+    time: row.createdAt,
+    topic: row.topic,
+    message: row.message,
+    title: row.title || undefined,
+    priority: row.priority || 3,
+    tags: row.tags ? JSON.parse(row.tags) : undefined,
+    click: row.click || undefined,
+    icon: row.icon || undefined,
+    actions: row.actions ? JSON.parse(row.actions) : undefined,
+    event: row.event
+  }
+}
+
+// Get messages for a specific topic
+export async function getMessagesByTopic(topic: string): Promise<any[]> {
+  const results = await db
+    .select()
+    .from(messages)
+    .where(eq(messages.topic, topic))
+    .orderBy(desc(messages.createdAt))
+    .limit(100)
+
+  return results.map(parseMessage)
+}
+
+// Get all unique topics
+export async function getAllTopics(): Promise<string[]> {
+  const results = await db
+    .selectDistinct({ topic: messages.topic })
+    .from(messages)
+    .orderBy(messages.topic)
+
+  return results.map(row => row.topic)
+}
+
+// Get filtered messages
+export interface MessageFilters {
+  topic?: string
+  search?: string
+  startDate?: string
+  endDate?: string
+}
+
+export async function getFilteredMessages(filters: MessageFilters): Promise<any[]> {
+  const conditions = []
+
+  if (filters.topic) {
+    conditions.push(eq(messages.topic, filters.topic))
+  }
+
+  if (filters.search) {
+    // Search in both message content, topic, and title
+    const searchPattern = `%${filters.search}%`
+    conditions.push(
+      or(
+        like(messages.message, searchPattern),
+        like(messages.topic, searchPattern),
+        like(messages.title, searchPattern)
       )
-    `, (err) => {
-      if (err) {
-        console.error('Error creating messages table:', err.message);
-      } else {
-        console.log('Database tables initialized');
-      }
-    });
-    
-    // Create index for faster topic-based queries
-    db.run(`
-      CREATE INDEX IF NOT EXISTS idx_messages_topic ON messages(topic)
-    `, (err) => {
-      if (err) {
-        console.error('Error creating index:', err.message);
-      }
-    });
-    
-    // Create index for faster time-based queries
-    db.run(`
-      CREATE INDEX IF NOT EXISTS idx_messages_created_at ON messages(created_at)
-    `, (err) => {
-      if (err) {
-        console.error('Error creating index:', err.message);
-      }
-    });
-  });
-}
+    )
+  }
 
-// Function to save a message to the database
-export function saveMessage(topic: string, message: string, callback: (err: Error | null, result?: any) => void) {
-  const messageId = Date.now().toString() + '-' + Math.random().toString(36).substring(2, 8);
-  
-  db.run(`
-    INSERT INTO messages (message_id, topic, message, event)
-    VALUES (?, ?, ?, ?)
-  `, [messageId, topic, message, 'message'], function(err) {
-    if (err) {
-      console.error('Error saving message:', err.message);
-      callback(err);
-    } else {
-      console.log(`Message saved to database with ID: ${this.lastID}`);
-      callback(null, {
-        id: messageId,
-        time: new Date().toISOString(),
-        topic,
-        message,
-        event: 'message'
-      });
-    }
-  });
-}
+  if (filters.startDate) {
+    conditions.push(gte(messages.createdAt, filters.startDate))
+  }
 
-// Function to get messages for a specific topic
-export function getMessagesByTopic(topic: string, callback: (err: Error | null, messages?: any[]) => void) {
-  db.all(`
-    SELECT message_id as id, topic, message, event, created_at as time
-    FROM messages
-    WHERE topic = ?
-    ORDER BY created_at DESC
-    LIMIT 100
-  `, [topic], (err, rows) => {
-    if (err) {
-      console.error('Error retrieving messages:', err.message);
-      callback(err, []);
-    } else {
-      // Convert time format to match original implementation
-      const messages = rows.map(row => ({
-        id: row.id,
-        time: row.time, // SQLite returns ISO format by default
-        topic: row.topic,
-        message: row.message,
-        event: row.event
-      }));
-      callback(null, messages);
-    }
-  });
-}
+  if (filters.endDate) {
+    conditions.push(lte(messages.createdAt, filters.endDate))
+  }
 
-// Function to get all unique topics
-export function getAllTopics(callback: (err: Error | null, topics?: string[]) => void) {
-  db.all(`
-    SELECT DISTINCT topic FROM messages ORDER BY topic ASC
-  `, (err, rows) => {
-    if (err) {
-      console.error('Error retrieving topics:', err.message);
-      callback(err, []);
-    } else {
-      const topics = rows.map(row => row.topic);
-      callback(null, topics);
-    }
-  });
-}
+  const query = db
+    .select()
+    .from(messages)
+    .orderBy(desc(messages.createdAt))
+    .limit(100)
 
-// Function to close the database connection
-export function closeDatabase() {
-  db.close((err) => {
-    if (err) {
-      console.error('Error closing database:', err.message);
-    } else {
-      console.log('Database connection closed');
-    }
-  });
+  const results = conditions.length > 0
+    ? await query.where(and(...conditions))
+    : await query
+
+  return results.map(parseMessage)
 }

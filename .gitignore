@@ -25,3 +25,8 @@ logs
 
 # Test coverage
 coverage/
+
+*.db
+*.db-wal
+*.db-whl
+*.db-shm

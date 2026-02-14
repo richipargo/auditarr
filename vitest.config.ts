@@ -12,6 +12,20 @@ export default defineConfig({
           environment: 'node',
         },
       },
+      {
+        test: {
+          name: 'api',
+          include: ['test/api/*.{test,spec}.ts'],
+          environment: 'nuxt',
+          fileParallelism: false,
+          environmentOptions: {
+            nuxt: {
+              rootDir: fileURLToPath(new URL('.', import.meta.url)),
+              domEnvironment: 'happy-dom',
+            },
+          },
+        },
+      },
       await defineVitestProject({
         test: {
           name: 'nuxt',

@@ -1,17 +1,18 @@
-import { getMessagesByTopic } from '../utils/database';
+import { getMessagesByTopic } from '../utils/database'
 
 export default defineEventHandler(async (event) => {
-  const topic = getRouterParam(event, 'topic');
+  try {
+    const topic = getRouterParam(event, 'topic')
+    if (!topic) {
+      setResponseStatus(event, 400)
+      return { error: 'Topic is required' }
+    }
 
-  return new Promise((resolve, reject) => {
-    getMessagesByTopic(topic, (err, messages) => {
-      if (err) {
-        console.error('Error retrieving messages:', err);
-        setResponseStatus(event, 500);
-        resolve([]);
-      } else {
-        resolve(messages);
-      }
-    });
-  });
-});
+    const messages = await getMessagesByTopic(topic)
+    return messages
+  } catch (error) {
+    console.error('Error retrieving messages:', error)
+    setResponseStatus(event, 500)
+    return []
+  }
+})
