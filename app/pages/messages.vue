@@ -83,7 +83,7 @@
           <UIcon name="i-heroicons-server" class="w-8 h-8 text-blue-500" />
           <div>
             <p class="text-sm text-gray-600 dark:text-gray-400">Topics</p>
-            <p class="text-2xl font-bold">{{ availableTopics.length }}</p>
+            <p class="text-2xl font-bold">{{ topics.length }}</p>
           </div>
         </div>
       </UCard>
@@ -148,13 +148,13 @@
 </template>
 
 <script setup lang="ts">
-const messages = ref<any[]>([])
-const availableTopics = ref<string[]>([])
-const loading = ref(false)
-const isModalOpen = ref(false)
-const selectedMessage = ref<any>(null)
+import type { MessageFilters } from '~/utils/api'
 
-const filters = ref({
+// Use composables for state management
+const { messages, topics, loading, highPriorityCount, recentCount, loadMessages, loadTopics } = useMessages()
+const { isOpen: isModalOpen, selectedMessage, open: openMessageModal } = useMessageModal()
+
+const filters = ref<MessageFilters & { topic: string }>({
   topic: 'all',
   search: '',
   startDate: '',
@@ -164,7 +164,7 @@ const filters = ref({
 // Computed Properties
 const topicOptions = computed(() => [
   { label: 'All Topics', value: 'all' },
-  ...availableTopics.value.map(topic => ({
+  ...topics.value.map(topic => ({
     label: topic,
     value: topic
   }))
@@ -179,52 +179,18 @@ const hasActiveFilters = computed(() => {
   )
 })
 
-const highPriorityCount = computed(() => {
-  return messages.value.filter(m => m.priority >= 4).length
-})
+// Build filter params from current filters
+const getFilterParams = (): MessageFilters => {
+  const filterParams: MessageFilters = {}
 
-const recentCount = computed(() => {
-  const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000)
-  return messages.value.filter(m => new Date(m.time) > oneDayAgo).length
-})
-
-// Open message modal
-const openMessageModal = (message: any) => {
-  selectedMessage.value = message
-  isModalOpen.value = true
-}
-
-// Fetch all topics for the dropdown
-const fetchTopics = async () => {
-  try {
-    const response = await $fetch('/api/topics')
-    availableTopics.value = response
-  } catch (error) {
-    console.error('Error fetching topics:', error)
-    availableTopics.value = []
+  if (filters.value.topic && filters.value.topic !== 'all') {
+    filterParams.topic = filters.value.topic
   }
-}
+  if (filters.value.search) filterParams.search = filters.value.search
+  if (filters.value.startDate) filterParams.startDate = filters.value.startDate
+  if (filters.value.endDate) filterParams.endDate = filters.value.endDate
 
-// Fetch messages with current filters
-const fetchMessages = async () => {
-  loading.value = true
-  try {
-    const query: any = {}
-    if (filters.value.topic && filters.value.topic !== 'all') {
-      query.topic = filters.value.topic
-    }
-    if (filters.value.search) query.search = filters.value.search
-    if (filters.value.startDate) query.startDate = filters.value.startDate
-    if (filters.value.endDate) query.endDate = filters.value.endDate
-
-    const response = await $fetch('/api/messages', { query })
-    messages.value = response
-  } catch (error) {
-    console.error('Error fetching messages:', error)
-    messages.value = []
-  } finally {
-    loading.value = false
-  }
+  return filterParams
 }
 
 // Clear all filters
@@ -239,12 +205,12 @@ const clearFilters = () => {
 
 // Watch for filter changes and refetch messages
 watch(filters, () => {
-  fetchMessages()
+  loadMessages(getFilterParams())
 }, { deep: true })
 
 // Initial data load
 onMounted(() => {
-  fetchTopics()
-  fetchMessages()
+  loadTopics()
+  loadMessages(getFilterParams())
 })
 </script>

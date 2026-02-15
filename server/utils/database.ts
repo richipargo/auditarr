@@ -1,16 +1,15 @@
 import { db } from '../db'
 import { messages } from '../db/schema'
 import { eq, desc, and, or, like, gte, lte } from 'drizzle-orm'
+import {
+  type MessageMetadata,
+  type MessageResponse,
+  type MessageFilters,
+  messageResponseSchema
+} from '../schemas/message'
 
-// Message metadata interface matching ntfy.sh format
-export interface MessageMetadata {
-  title?: string
-  priority?: number
-  tags?: string[]
-  click?: string
-  icon?: string
-  actions?: any[]
-}
+// Re-export types for convenience
+export type { MessageMetadata, MessageResponse, MessageFilters }
 
 // Generate unique message ID
 function generateMessageId(): string {
@@ -22,7 +21,7 @@ export async function saveMessage(
   topic: string,
   message: string,
   metadata: MessageMetadata = {}
-): Promise<any> {
+): Promise<MessageResponse> {
   const messageId = generateMessageId()
   const time = new Date().toISOString()
 
@@ -62,8 +61,8 @@ export async function saveMessage(
 }
 
 // Parse message from database row
-function parseMessage(row: any) {
-  return {
+function parseMessage(row: any): MessageResponse {
+  const parsed = {
     id: row.messageId,
     time: row.createdAt,
     topic: row.topic,
@@ -76,10 +75,13 @@ function parseMessage(row: any) {
     actions: row.actions ? JSON.parse(row.actions) : undefined,
     event: row.event
   }
+
+  // Validate with Zod schema
+  return messageResponseSchema.parse(parsed)
 }
 
 // Get messages for a specific topic
-export async function getMessagesByTopic(topic: string): Promise<any[]> {
+export async function getMessagesByTopic(topic: string): Promise<MessageResponse[]> {
   const results = await db
     .select()
     .from(messages)
@@ -101,14 +103,7 @@ export async function getAllTopics(): Promise<string[]> {
 }
 
 // Get filtered messages
-export interface MessageFilters {
-  topic?: string
-  search?: string
-  startDate?: string
-  endDate?: string
-}
-
-export async function getFilteredMessages(filters: MessageFilters): Promise<any[]> {
+export async function getFilteredMessages(filters: MessageFilters): Promise<MessageResponse[]> {
   const conditions = []
 
   if (filters.topic) {

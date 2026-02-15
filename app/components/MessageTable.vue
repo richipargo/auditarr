@@ -76,12 +76,14 @@
 </template>
 
 <script setup lang="ts">
+import type { MessageResponse } from '~/utils/api'
+
 defineProps<{
-  messages: any[]
+  messages: MessageResponse[]
 }>()
 
 defineEmits<{
-  select: [message: any]
+  select: [message: MessageResponse]
 }>()
 
 // Table columns

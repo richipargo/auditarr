@@ -1,4 +1,5 @@
 import { getMessagesByTopic } from '../utils/database'
+import { messagesArraySchema } from '../schemas/message'
 
 export default defineEventHandler(async (event) => {
   try {
@@ -9,7 +10,9 @@ export default defineEventHandler(async (event) => {
     }
 
     const messages = await getMessagesByTopic(topic)
-    return messages
+
+    // Validate response array with Zod
+    return messagesArraySchema.parse(messages)
   } catch (error) {
     console.error('Error retrieving messages:', error)
     setResponseStatus(event, 500)

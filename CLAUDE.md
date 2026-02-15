@@ -13,6 +13,7 @@ AuditArr is a message audit trail application built with **Nuxt 4** and **@nuxt/
 - **Vue 3** - Progressive JavaScript framework with Composition API
 - **Drizzle ORM** - Type-safe database toolkit
 - **better-sqlite3** - Fast SQLite driver
+- **Zod** - Runtime type validation for API responses
 - **TypeScript** - Full type safety throughout
 - **Tailwind CSS v4** - Utility-first CSS framework
 
@@ -81,6 +82,29 @@ docker run -d -p 3000:3000 -v $(pwd)/data:/data auditarr
 - `app/pages/messages.vue` - Audit trail interface (/messages)
 - `server/` - Server-side code (API, database, utilities)
 - `assets/css/main.css` - Required for Tailwind CSS v4 imports
+
+### Type Validation Layer
+
+**Zod Schemas (server/schemas/message.ts):**
+- `actionSchema` - ntfy.sh action button schema
+- `messageMetadataSchema` - Incoming message metadata validation
+- `messageResponseSchema` - API response validation
+- `messagesArraySchema` - Array of messages validation
+- `topicsArraySchema` - Array of topics validation
+- `messageFiltersSchema` - Query parameter validation
+- All schemas export TypeScript types via `z.infer<>`
+
+**Runtime Validation:**
+- All API endpoints validate inputs with Zod schemas
+- All API responses validated before returning to client
+- Database functions return strongly-typed objects
+- Catches type errors at runtime, not just compile time
+
+**Frontend Type Safety:**
+- `app/utils/api.ts` - Typed API fetch functions with Zod validation
+- `app/composables/useMessages.ts` - Typed composables for state management
+- All UI components use `MessageResponse` types
+- Full type safety from database to UI
 
 ### Database Layer
 

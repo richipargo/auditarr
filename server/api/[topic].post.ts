@@ -1,4 +1,5 @@
 import { saveMessage, type MessageMetadata } from '../utils/database'
+import { messageMetadataSchema, messageResponseSchema } from '../schemas/message'
 
 // Extract ntfy.sh-style headers from request
 function extractMetadata(event: any): MessageMetadata {
@@ -69,13 +70,18 @@ export default defineEventHandler(async (event) => {
     // Extract ntfy.sh headers
     const metadata = extractMetadata(event)
 
+    // Validate metadata with Zod
+    const validatedMetadata = messageMetadataSchema.parse(metadata)
+
     console.log(`[${new Date().toISOString()}] Publishing to topic "${topic}":`, {
       message: message.substring(0, 100),
-      metadata
+      metadata: validatedMetadata
     })
 
-    await saveMessage(topic, message, metadata)
-    return 'OK'
+    const result = await saveMessage(topic, message, validatedMetadata)
+
+    // Validate response with Zod
+    return messageResponseSchema.parse(result)
   } catch (error) {
     console.error('Error saving message to database:', error)
     setResponseStatus(event, 500)

@@ -170,8 +170,14 @@
 </template>
 
 <script setup lang="ts">
+import type { MessageResponse } from '~/utils/api'
+
+defineOptions({
+  inheritAttrs: false
+})
+
 const props = defineProps<{
-  message: any
+  message: MessageResponse
   modelValue: boolean
 }>()
 
