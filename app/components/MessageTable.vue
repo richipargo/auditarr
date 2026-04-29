@@ -6,7 +6,6 @@
         <UBadge
           :color="getPriorityColor(row.original.priority)"
           variant="subtle"
-          size="xs"
         >
           {{ getPriorityLabel(row.original.priority) }}
         </UBadge>
@@ -17,7 +16,6 @@
         <UBadge
           :color="getTopicColor(row.original.topic)"
           variant="soft"
-          size="xs"
         >
           {{ row.original.topic }}
         </UBadge>
@@ -32,10 +30,10 @@
           />
           <div>
             <p class="font-medium text-gray-900 dark:text-white">
-              {{ row.original.title || truncate(row.original.message, 60) }}
+              {{ row.original.title || truncate(row.original.message, 80) }}
             </p>
-            <p v-if="!row.original.title" class="text-xs text-gray-500 dark:text-gray-400 mt-1">
-              {{ truncate(row.original.message, 100) }}
+            <p v-if="!row.original.title" class="text-sm text-gray-500 dark:text-gray-400 mt-1">
+              {{ truncate(row.original.message, 120) }}
             </p>
           </div>
         </div>
@@ -43,7 +41,7 @@
 
       <!-- Time -->
       <template #time-cell="{ row }">
-        <span class="text-xs text-gray-500 dark:text-gray-400 whitespace-nowrap">
+        <span class="text-sm text-gray-500 dark:text-gray-400 whitespace-nowrap">
           {{ formatDate(row.original.time) }}
         </span>
       </template>
@@ -56,13 +54,13 @@
             :key="tag"
             color="gray"
             variant="subtle"
-            size="xs"
+            size="sm"
           >
             {{ tag }}
           </UBadge>
           <span
             v-if="row.original.tags.length > 2"
-            class="text-xs text-gray-400"
+            class="text-sm text-gray-400"
           >
             +{{ row.original.tags.length - 2 }}
           </span>

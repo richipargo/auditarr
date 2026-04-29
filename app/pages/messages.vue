@@ -6,7 +6,7 @@
         <h1 class="text-2xl font-bold text-gray-900 dark:text-white">
           Message Audit Trail
         </h1>
-        <p class="text-gray-500 dark:text-gray-400 mt-1">
+        <p class="text-lg text-gray-500 dark:text-gray-400 mt-1">
           All notifications in one place
         </p>
       </div>
@@ -66,25 +66,25 @@
       <UCard>
         <div class="text-center">
           <p class="text-2xl font-semibold">{{ messages.length }}</p>
-          <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Messages</p>
+          <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Messages</p>
         </div>
       </UCard>
       <UCard>
         <div class="text-center">
           <p class="text-2xl font-semibold">{{ topics.length }}</p>
-          <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Topics</p>
+          <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Topics</p>
         </div>
       </UCard>
       <UCard>
         <div class="text-center">
           <p class="text-2xl font-semibold text-orange-600 dark:text-orange-400">{{ highPriorityCount }}</p>
-          <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">High Priority</p>
+          <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">High Priority</p>
         </div>
       </UCard>
       <UCard>
         <div class="text-center">
           <p class="text-2xl font-semibold text-green-600 dark:text-green-400">{{ recentCount }}</p>
-          <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Recent</p>
+          <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Recent</p>
         </div>
       </UCard>
     </div>

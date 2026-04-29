@@ -10,7 +10,7 @@ import { db } from './index'
 import * as schema from './schema'
 
 async function seedRandom() {
-  console.log('🎲 Generating random test data with drizzle-seed...\n')
+  console.log('Generating random test data with drizzle-seed...\n')
 
   try {
     // Generate random messages using drizzle-seed
@@ -18,12 +18,12 @@ async function seedRandom() {
       count: 100, // Generate 100 random messages
     })
 
-    console.log('✅ Successfully generated 100 random messages')
-    console.log('\n💡 Note: This data is randomly generated.')
+    console.log('Successfully generated 100 random messages')
+    console.log('\nNote: This data is randomly generated.')
     console.log('   For realistic Sonarr/Radarr examples, use: npm run db:seed')
 
   } catch (error) {
-    console.error('❌ Error generating random data:', error)
+    console.error('Error generating random data:', error)
     process.exit(1)
   }
 
@@ -31,3 +31,4 @@ async function seedRandom() {
 }
 
 seedRandom()
+

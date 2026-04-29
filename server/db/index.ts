@@ -22,4 +22,4 @@ sqlite.pragma('journal_mode = WAL')
 // Create Drizzle instance
 export const db = drizzle(sqlite, { schema })
 
-console.log('✅ Connected to SQLite database with Drizzle ORM')
+console.log('Connected to SQLite database with Drizzle ORM')

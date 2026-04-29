@@ -82,7 +82,7 @@
                 <ul class="text-sm text-gray-600 dark:text-gray-400 space-y-1 mt-2">
                   <li>Sonarr/Radarr → Settings → Connect</li>
                   <li>Add ntfy notification</li>
-                  <li>URL: <code class="text-xs bg-gray-100 dark:bg-gray-800 px-1 py-0.5 rounded">http://your-server:3000/api/sonarr</code></li>
+                  <li>URL: <code class="text-sm bg-gray-100 dark:bg-gray-800 px-1 py-0.5 rounded">http://your-server:3000/api/sonarr</code></li>
                 </ul>
               </div>
             </div>

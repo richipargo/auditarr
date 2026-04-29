@@ -17,14 +17,34 @@ function generateMessageId(): string {
   return Date.now().toString() + '-' + Math.random().toString(36).substring(2, 8)
 }
 
+// Normalize topic to lowercase for case-insensitive handling
+function normalizeTopic(topic: string): string {
+  return topic.toLowerCase()
+}
+
 // Save a message to the database
 export async function saveMessage(
   topic: string,
   message: string,
   metadata: MessageMetadata = {}
 ): Promise<MessageResponse> {
+  // Dismiss empty messages - log and return without failing
+  if (!message || message.trim() === '') {
+    console.log(`Dismissing empty message for topic "${topic}"`)
+    // Return a dummy response that passes validation
+    return messageResponseSchema.parse({
+      id: '',
+      time: new Date().toISOString(),
+      topic: normalizeTopic(topic),
+      message: '',
+      event: 'message',
+      priority: 3
+    })
+  }
+
   const messageId = generateMessageId()
   const time = new Date().toISOString()
+  const normalizedTopic = normalizeTopic(topic)
 
   // Serialize arrays/objects to JSON strings for storage
   const tagsStr = metadata.tags ? JSON.stringify(metadata.tags) : null
@@ -33,7 +53,7 @@ export async function saveMessage(
 
   const [inserted] = await db.insert(messages).values({
     messageId,
-    topic,
+    topic: normalizedTopic,
     message,
     title: metadata.title || null,
     priority: metadata.priority || 3,
@@ -46,12 +66,12 @@ export async function saveMessage(
     createdAt: time
   }).returning()
 
-  console.log(`✅ Message saved to database with ID: ${inserted.id}`)
+  console.log(`Message saved to database with ID: ${inserted.id}`)
 
   return {
     id: inserted.messageId,
     time: inserted.createdAt,
-    topic: inserted.topic,
+    topic: normalizedTopic,
     message: inserted.message,
     title: inserted.title || undefined,
     priority: inserted.priority,
@@ -87,10 +107,11 @@ function parseMessage(row: Message): MessageResponse {
 
 // Get messages for a specific topic
 export async function getMessagesByTopic(topic: string): Promise<MessageResponse[]> {
+  const normalizedTopic = normalizeTopic(topic)
   const results = await db
     .select()
     .from(messages)
-    .where(eq(messages.topic, topic))
+    .where(eq(messages.topic, normalizedTopic))
     .orderBy(desc(messages.createdAt))
     .limit(100)
 
@@ -112,16 +133,17 @@ export async function getFilteredMessages(filters: MessageFilters): Promise<Mess
   const conditions = []
 
   if (filters.topic) {
-    conditions.push(eq(messages.topic, filters.topic))
+    const normalizedTopic = normalizeTopic(filters.topic)
+    conditions.push(eq(messages.topic, normalizedTopic))
   }
 
   if (filters.search) {
-    // Search in both message content, topic, and title
+    // Search in both message content, topic, and title (case-insensitive for topic)
     const searchPattern = `%${filters.search}%`
     conditions.push(
       or(
         like(messages.message, searchPattern),
-        like(messages.topic, searchPattern),
+        like(messages.topic, `%${filters.search.toLowerCase()}%`),
         like(messages.title, searchPattern)
       )
     )

@@ -249,22 +249,22 @@ Size: 45.2 MB`,
 ]
 
 async function seed() {
-  console.log('🌱 Seeding database with example messages...\n')
+  console.log('Seeding database with example messages...\n')
 
   try {
     // Insert all example messages
     await db.insert(messages).values(exampleMessages)
 
-    console.log(`✅ Successfully seeded ${exampleMessages.length} messages`)
+    console.log(`Successfully seeded ${exampleMessages.length} messages`)
     console.log('\nTopics seeded:')
     console.log('  - sonarr (5 messages)')
     console.log('  - radarr (5 messages)')
     console.log('  - system (1 message)')
     console.log('  - test (1 message)')
-    console.log('\n✨ Seeding complete!')
+    console.log('\nSeeding complete!')
 
   } catch (error) {
-    console.error('❌ Error seeding database:', error)
+    console.error('Error seeding database:', error)
     process.exit(1)
   }
 
@@ -272,3 +272,4 @@ async function seed() {
 }
 
 seed()
+
