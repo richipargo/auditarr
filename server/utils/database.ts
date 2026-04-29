@@ -5,11 +5,12 @@ import {
   type MessageMetadata,
   type MessageResponse,
   type MessageFilters,
+  type RichMetadata,
   messageResponseSchema
 } from '../schemas/message'
 
 // Re-export types for convenience
-export type { MessageMetadata, MessageResponse, MessageFilters }
+export type { MessageMetadata, MessageResponse, MessageFilters, RichMetadata }
 
 // Generate unique message ID
 function generateMessageId(): string {
@@ -28,6 +29,7 @@ export async function saveMessage(
   // Serialize arrays/objects to JSON strings for storage
   const tagsStr = metadata.tags ? JSON.stringify(metadata.tags) : null
   const actionsStr = metadata.actions ? JSON.stringify(metadata.actions) : null
+  const metadataStr = metadata.metadata ? JSON.stringify(metadata.metadata) : null
 
   const [inserted] = await db.insert(messages).values({
     messageId,
@@ -39,6 +41,7 @@ export async function saveMessage(
     click: metadata.click || null,
     icon: metadata.icon || null,
     actions: actionsStr,
+    metadata: metadataStr,
     event: 'message',
     createdAt: time
   }).returning()
@@ -56,6 +59,7 @@ export async function saveMessage(
     click: inserted.click || undefined,
     icon: inserted.icon || undefined,
     actions: metadata.actions,
+    metadata: metadata.metadata,
     event: inserted.event
   }
 }
@@ -73,6 +77,7 @@ function parseMessage(row: Message): MessageResponse {
     click: row.click || undefined,
     icon: row.icon || undefined,
     actions: row.actions ? JSON.parse(row.actions) : undefined,
+    metadata: row.metadata ? JSON.parse(row.metadata) : undefined,
     event: row.event
   }
 

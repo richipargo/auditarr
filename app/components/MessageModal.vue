@@ -109,6 +109,117 @@
             </dl>
           </div>
 
+          <!-- Rich Metadata (Radarr/Sonarr) -->
+          <div
+            v-if="message.metadata && Object.keys(message.metadata).length > 0"
+            class="border-t border-gray-200 dark:border-gray-700 pt-4"
+          >
+            <h4 class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3">
+              Media Info
+            </h4>
+            <dl class="grid grid-cols-2 gap-4 text-sm">
+              <!-- Quality -->
+              <div v-if="message.metadata?.quality">
+                <dt class="text-gray-500 dark:text-gray-400">Quality</dt>
+                <dd class="text-gray-900 dark:text-white mt-1">
+                  {{ message.metadata.quality }}
+                </dd>
+              </div>
+              
+              <!-- Size -->
+              <div v-if="message.metadata?.size">
+                <dt class="text-gray-500 dark:text-gray-400">Size</dt>
+                <dd class="text-gray-900 dark:text-white mt-1">
+                  {{ message.metadata.size }}
+                </dd>
+              </div>
+              
+              <!-- Release Group -->
+              <div v-if="message.metadata?.releaseGroup">
+                <dt class="text-gray-500 dark:text-gray-400">Release Group</dt>
+                <dd class="text-gray-900 dark:text-white mt-1">
+                  {{ message.metadata.releaseGroup }}
+                </dd>
+              </div>
+              
+              <!-- Indexer -->
+              <div v-if="message.metadata?.indexer">
+                <dt class="text-gray-500 dark:text-gray-400">Indexer</dt>
+                <dd class="text-gray-900 dark:text-white mt-1">
+                  {{ message.metadata.indexer }}
+                </dd>
+              </div>
+              
+              <!-- Download Client -->
+              <div v-if="message.metadata?.downloadClient">
+                <dt class="text-gray-500 dark:text-gray-400">Download Client</dt>
+                <dd class="text-gray-900 dark:text-white mt-1">
+                  {{ message.metadata.downloadClient }}
+                </dd>
+              </div>
+              
+              <!-- Source -->
+              <div v-if="message.metadata?.source">
+                <dt class="text-gray-500 dark:text-gray-400">Source</dt>
+                <dd class="text-gray-900 dark:text-white mt-1">
+                  {{ message.metadata.source }}
+                </dd>
+              </div>
+              
+              <!-- Series/Movie Info -->
+              <div v-if="message.metadata?.seriesName">
+                <dt class="text-gray-500 dark:text-gray-400">Series</dt>
+                <dd class="text-gray-900 dark:text-white mt-1">
+                  {{ message.metadata.seriesName }}
+                </dd>
+              </div>
+              
+              <div v-if="message.metadata?.episodeTitle">
+                <dt class="text-gray-500 dark:text-gray-400">Episode</dt>
+                <dd class="text-gray-900 dark:text-white mt-1">
+                  {{ message.metadata.episodeTitle }}
+                </dd>
+              </div>
+              
+              <div v-if="message.metadata?.episodeNumber || message.metadata?.seasonNumber">
+                <dt class="text-gray-500 dark:text-gray-400">Episode #</dt>
+                <dd class="text-gray-900 dark:text-white mt-1">
+                  S{{ message.metadata.seasonNumber }}E{{ message.metadata.episodeNumber }}
+                </dd>
+              </div>
+              
+              <div v-if="message.metadata?.movieTitle">
+                <dt class="text-gray-500 dark:text-gray-400">Movie</dt>
+                <dd class="text-gray-900 dark:text-white mt-1">
+                  {{ message.metadata.movieTitle }}
+                </dd>
+              </div>
+              
+              <div v-if="message.metadata?.movieYear">
+                <dt class="text-gray-500 dark:text-gray-400">Year</dt>
+                <dd class="text-gray-900 dark:text-white mt-1">
+                  {{ message.metadata.movieYear }}
+                </dd>
+              </div>
+              
+              <!-- Custom Format Score -->
+              <div v-if="message.metadata?.customFormatScore">
+                <dt class="text-gray-500 dark:text-gray-400">CF Score</dt>
+                <dd class="text-gray-900 dark:text-white mt-1">
+                  {{ message.metadata.customFormatScore }}
+                </dd>
+              </div>
+              
+              <!-- File Name -->
+              <div v-if="message.metadata?.fileName">
+                <dt class="text-gray-500 dark:text-gray-400">File Name</dt>
+                <dd class="font-mono text-xs text-gray-900 dark:text-white mt-1 truncate">
+                  {{ message.metadata.fileName }}
+                </dd>
+              </div>
+            </dl>
+          </div>
+
           <!-- Actions -->
           <div
             v-if="message.click || message.actions?.length"

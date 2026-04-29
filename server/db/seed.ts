@@ -1,83 +1,103 @@
 import { db } from './index'
 import { messages } from './schema'
 
-// Seed data with realistic Sonarr/Radarr notifications
+// Seed data with realistic Sonarr/Radarr notifications including rich metadata
 const exampleMessages = [
-  // Sonarr - Episode Downloaded
+  // Sonarr - Episode Downloaded with rich metadata
   {
     messageId: `${Date.now()}-sonarr1`,
     topic: 'sonarr',
-    message: `Young Sheldon S06E05 "A Resident Advisor and the Word 'Sketchy'" has been downloaded and imported.
-
-Quality: WEBDL-1080p
-Size: 1.34 GB
-Release Group: GLHF
-Source: 1337x (Prowlarr)`,
+    message: `Young Sheldon S06E05 "A Resident Advisor and the Word 'Sketchy'" has been downloaded and imported.`,
     title: 'Episode Downloaded: Young Sheldon',
     priority: 3,
     tags: JSON.stringify(['tv', 'download', '✅']),
     click: 'https://sonarr.local/series/young-sheldon',
     icon: null,
     actions: null,
+    metadata: JSON.stringify({
+      seriesName: 'Young Sheldon',
+      episodeTitle: "A Resident Advisor and the Word 'Sketchy'",
+      episodeNumber: '5',
+      seasonNumber: '6',
+      quality: 'WEBDL-1080p',
+      size: '1.34 GB',
+      releaseGroup: 'GLHF',
+      indexer: '1337x',
+      source: 'Prowlarr',
+      downloadClient: 'SABnzbd'
+    }),
     event: 'message',
     createdAt: new Date(Date.now() - 3600000).toISOString()
   },
 
-  // Sonarr - Episode Grabbed
+  // Sonarr - Episode Grabbed with rich metadata
   {
     messageId: `${Date.now()}-sonarr2`,
     topic: 'sonarr',
-    message: `Breaking Bad S05E14 "Ozymandias" has been grabbed and is queued for download.
-
-Quality: Bluray-1080p
-Indexer: NZBgeek
-Download Client: SABnzbd`,
+    message: `Breaking Bad S05E14 "Ozymandias" has been grabbed and is queued for download.`,
     title: '📺 Episode Grabbed: Breaking Bad',
     priority: 4,
     tags: JSON.stringify(['tv', 'grab', '⬇️']),
     click: null,
     icon: null,
     actions: null,
+    metadata: JSON.stringify({
+      seriesName: 'Breaking Bad',
+      episodeTitle: 'Ozymandias',
+      episodeNumber: '14',
+      seasonNumber: '5',
+      quality: 'Bluray-1080p',
+      indexer: 'NZBgeek',
+      downloadClient: 'SABnzbd'
+    }),
     event: 'message',
     createdAt: new Date(Date.now() - 7200000).toISOString()
   },
 
-  // Radarr - Movie Downloaded
+  // Radarr - Movie Downloaded with rich metadata
   {
     messageId: `${Date.now()}-radarr1`,
     topic: 'radarr',
-    message: `The Shawshank Redemption (1994) has been downloaded and added to your library.
-
-Quality: Bluray-1080p
-Size: 8.5 GB
-Release Group: SPARKS
-Custom Format Score: 150`,
+    message: `The Shawshank Redemption (1994) has been downloaded and added to your library.`,
     title: '🎬 Movie Downloaded: The Shawshank Redemption',
     priority: 3,
     tags: JSON.stringify(['movie', 'download', '✅', '1994']),
     click: 'https://radarr.local/movie/the-shawshank-redemption-1994',
     icon: null,
     actions: null,
+    metadata: JSON.stringify({
+      movieTitle: 'The Shawshank Redemption',
+      movieYear: '1994',
+      quality: 'Bluray-1080p',
+      size: '8.5 GB',
+      releaseGroup: 'SPARKS',
+      customFormat: 'Bluray-1080p',
+      customFormatScore: 150
+    }),
     event: 'message',
     createdAt: new Date(Date.now() - 10800000).toISOString()
   },
 
-  // Radarr - Movie Grabbed
+  // Radarr - Movie Grabbed with rich metadata
   {
     messageId: `${Date.now()}-radarr2`,
     topic: 'radarr',
-    message: `Inception (2010) has been grabbed and sent to qBittorrent.
-
-Quality: WEBDL-2160p HDR
-Size: 25.3 GB
-Indexer: RARBG
-Custom Format Score: 200`,
+    message: `Inception (2010) has been grabbed and sent to qBittorrent.`,
     title: 'Movie Grabbed: Inception',
     priority: 4,
     tags: JSON.stringify(['movie', 'grab', '4K', 'HDR']),
     click: null,
     icon: null,
     actions: null,
+    metadata: JSON.stringify({
+      movieTitle: 'Inception',
+      movieYear: '2010',
+      quality: 'WEBDL-2160p HDR',
+      size: '25.3 GB',
+      indexer: 'RARBG',
+      downloadClient: 'qBittorrent',
+      customFormatScore: 200
+    }),
     event: 'message',
     createdAt: new Date(Date.now() - 14400000).toISOString()
   },

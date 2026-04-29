@@ -3,8 +3,11 @@ import {
   messagesArraySchema,
   topicsArraySchema,
   type MessageResponse,
-  type MessageFilters
+  type MessageFilters,
+  type RichMetadata
 } from '../../server/schemas/message'
+
+export type { RichMetadata }
 
 /**
  * Fetch all topics with type validation

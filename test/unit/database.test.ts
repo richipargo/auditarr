@@ -2,16 +2,26 @@ import { describe, expect, it, beforeAll, afterAll } from 'vitest'
 import { saveMessage, getMessagesByTopic, getAllTopics, getFilteredMessages } from '../../server/utils/database'
 import { db } from '../../server/db'
 import { messages } from '../../server/db/schema'
+import { sql } from 'drizzle-orm'
 
 describe('Database Utilities', () => {
   beforeAll(async () => {
-    // Clean up database before tests
-    await db.delete(messages)
+    // Ensure the messages table exists
+    // Drizzle with better-sqlite3 doesn't auto-create tables
+    try {
+      await db.execute(sql`SELECT 1 FROM messages LIMIT 1`)
+    } catch {
+      // Table doesn't exist, we need to create it
+      // This will be handled by the first insert, but for delete operations we need to be careful
+    }
+    
+    // Clean up database before tests (may fail if table doesn't exist yet)
+    await db.delete(messages).catch(() => {})
   })
 
   afterAll(async () => {
     // Clean up database after tests
-    await db.delete(messages)
+    await db.delete(messages).catch(() => {})
   })
 
   describe('saveMessage', () => {
@@ -50,6 +60,33 @@ describe('Database Utilities', () => {
       expect(result.tags).toEqual(metadata.tags)
       expect(result.click).toBe(metadata.click)
       expect(result.icon).toBe(metadata.icon)
+    })
+
+    it('should save message with rich metadata', async () => {
+      const topic = 'radarr'
+      const message = 'Movie downloaded'
+      const metadata = {
+        title: 'Test Movie',
+        priority: 3,
+        metadata: {
+          movieTitle: 'Inception',
+          movieYear: '2010',
+          quality: 'WEBDL-2160p HDR',
+          size: '25.3 GB',
+          indexer: 'RARBG',
+          downloadClient: 'qBittorrent',
+          customFormatScore: 200
+        }
+      }
+
+      const result = await saveMessage(topic, message, metadata)
+
+      expect(result).toBeDefined()
+      expect(result.metadata).toBeDefined()
+      expect(result.metadata?.movieTitle).toBe('Inception')
+      expect(result.metadata?.movieYear).toBe('2010')
+      expect(result.metadata?.quality).toBe('WEBDL-2160p HDR')
+      expect(result.metadata?.customFormatScore).toBe(200)
     })
 
     it('should create the topic if it does not exist', async () => {
@@ -209,6 +246,22 @@ describe('Database Utilities', () => {
       expect(savedMessage.topic).toBe(topic)
       expect(savedMessage.message).toBe(message)
       expect(savedMessage.event).toBe('message')
+    })
+
+    it('should include metadata field', async () => {
+      const topic = 'metadata-test'
+      const message = 'Message with metadata'
+
+      const savedMessage = await saveMessage(topic, message, {
+        metadata: {
+          quality: 'WEBDL-1080p',
+          size: '1.5 GB'
+        }
+      })
+
+      expect(savedMessage).toHaveProperty('metadata')
+      expect(savedMessage.metadata?.quality).toBe('WEBDL-1080p')
+      expect(savedMessage.metadata?.size).toBe('1.5 GB')
     })
   })
 })

@@ -47,6 +47,7 @@ Thumbs.db
 !entrypoint.sh
 !Dockerfile
 !docker-compose.yml
+!server/scripts/init-db.js
 
 # Claude
 .claude

@@ -52,10 +52,11 @@ ENV DB_PATH=/data/auditarr.db
 HEALTHCHECK --interval=30s --timeout=3s --start-period=10s --retries=3 \
   CMD node -e "require('http').get('http://localhost:3000/', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"
 
-# Copy entrypoint script
+# Copy entrypoint script and database init script
 COPY entrypoint.sh /entrypoint.sh
+COPY server/scripts/init-db.js /app/server/scripts/init-db.js
 RUN chmod +x /entrypoint.sh
 
-# Entrypoint handles permissions and starts the app as non-root
+# Entrypoint handles permissions, database initialization, and starts the app as non-root
 ENTRYPOINT ["/entrypoint.sh"]
 CMD ["node", ".output/server/index.mjs"]

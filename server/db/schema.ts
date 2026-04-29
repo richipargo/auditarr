@@ -12,6 +12,7 @@ export const messages = sqliteTable('messages', {
   click: text('click'),
   icon: text('icon'),
   actions: text('actions'), // JSON string
+  metadata: text('metadata'), // JSON string for rich metadata (*arr apps)
   event: text('event').default('message').notNull(),
   createdAt: text('created_at').default(sql`(CURRENT_TIMESTAMP)`).notNull()
 })
