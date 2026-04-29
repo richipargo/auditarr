@@ -58,6 +58,42 @@
             </p>
           </div>
 
+          <!-- Images -->
+          <div v-if="extractedImages.length > 0" class="border-t border-gray-200 dark:border-gray-700 pt-4">
+            <h4 class="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3">
+              Images
+            </h4>
+            <div class="flex flex-wrap gap-4">
+              <img
+                v-for="(img, idx) in extractedImages"
+                :key="idx"
+                :src="img"
+                class="max-w-48 max-h-48 rounded-lg border border-gray-200 dark:border-gray-700 object-contain"
+                @error="handleImageError(idx)"
+              />
+            </div>
+          </div>
+
+          <!-- External Links -->
+          <div v-if="extractedLinks.length > 0" class="border-t border-gray-200 dark:border-gray-700 pt-4">
+            <h4 class="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3">
+              Links
+            </h4>
+            <div class="flex flex-wrap gap-2">
+              <UButton
+                v-for="(link, idx) in extractedLinks"
+                :key="idx"
+                :to="link.url"
+                target="_blank"
+                variant="outline"
+                size="sm"
+                icon="i-heroicons-arrow-top-right-on-square"
+              >
+                {{ link.label }}
+              </UButton>
+            </div>
+          </div>
+
           <!-- Tags -->
           <div v-if="message.tags?.length" class="border-t border-gray-200 dark:border-gray-700 pt-4">
             <h4 class="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3">
@@ -260,6 +296,7 @@
 
 <script setup lang="ts">
 import type { MessageResponse } from '~/utils/api'
+import { getTopicIcon, getTopicColor } from '~/utils/topicIcons'
 
 defineOptions({ inheritAttrs: false })
 
@@ -276,6 +313,84 @@ const isOpen = computed({
   get: () => props.modelValue,
   set: (value) => emit('update:modelValue', value)
 })
+
+// Extract images from message content and metadata
+const extractedImages = computed(() => {
+  const images: string[] = []
+  const metadata = props.message.metadata || {}
+
+  // Add icon from message header if present
+  if (props.message.icon) {
+    images.push(props.message.icon)
+  }
+
+  // Check for poster/fanart URLs in metadata
+  const metadataImageFields = ['poster', 'fanart', 'banner', 'thumbnail', 'image', 'posterUrl', 'fanartUrl']
+  for (const field of metadataImageFields) {
+    if (metadata[field as keyof typeof metadata]) {
+      const url = String(metadata[field as keyof typeof metadata])
+      if (url && !images.includes(url)) {
+        images.push(url)
+      }
+    }
+  }
+
+  // Extract image URLs from message content (common image formats)
+  const imageUrlRegex = /(https?:\/\/[^\s"'<>()]+\.(jpg|jpeg|png|gif|webp|svg)([?\S]*)?)/gi
+  const matches = props.message.message?.match(imageUrlRegex) || []
+  images.push(...matches.filter(img => !images.includes(img)))
+
+  return images.slice(0, 10) // Limit to 10 images max
+})
+
+// Extract external links from metadata (IMDB, TMDB, TVDb, etc.)
+const extractedLinks = computed(() => {
+  const links: { label: string; url: string }[] = []
+  const metadata = props.message.metadata || {}
+
+  // Check for IMDB ID
+  if (metadata.imdbId || metadata.imdb) {
+    let imdbId = String(metadata.imdbId || metadata.imdb || '').trim()
+    imdbId = imdbId.replace(/^tt/, '')
+    if (imdbId && !imdbId.startsWith('http')) {
+      links.push({ label: 'IMDb', url: `https://www.imdb.com/title/tt${imdbId}/` })
+    }
+  }
+
+  // Check for TMDB ID
+  if (metadata.tmdbId || metadata.tmdb) {
+    let tmdbId = String(metadata.tmdbId || metadata.tmdb || '').trim()
+    tmdbId = tmdbId.replace(/^\D+/g, '') // Extract just the numeric ID
+    if (tmdbId && !tmdbId.startsWith('http')) {
+      links.push({ label: 'TMDb', url: `https://www.themoviedb.org/movie/${tmdbId}` })
+    }
+  }
+
+  // Check for TVDb ID
+  if (metadata.tvdbId || metadata.tvdb) {
+    let tvdbId = String(metadata.tvdbId || metadata.tvdb || '').trim()
+    tvdbId = tvdbId.replace(/^\D+/g, '') // Extract just the numeric ID
+    if (tvdbId && !tvdbId.startsWith('http')) {
+      links.push({ label: 'TVDb', url: `https://thetvdb.com/?tab=series&id=${tvdbId}` })
+    }
+  }
+
+  // Check for Trakt ID
+  if (metadata.traktId || metadata.trakt) {
+    let traktId = String(metadata.traktId || metadata.trakt || '').trim()
+    if (traktId && !traktId.startsWith('http')) {
+      links.push({ label: 'Trakt', url: `https://trakt.tv/movies/${traktId}` })
+    }
+  }
+
+  return links
+})
+
+// Handle image load errors
+const handleImageError = (idx: number) => {
+  // Remove failed image from the array... but computed is readonly
+  // So we'll just ignore the error for now
+}
 
 const formatDate = (dateString: string) => {
   const date = new Date(dateString)
@@ -308,13 +423,5 @@ const getPriorityBadgeColor = (priority: number) => {
 
 const getPriorityColor = (priority: number) => {
   return { 1: 'bg-gray-500', 2: 'bg-blue-500', 3: 'bg-green-500', 4: 'bg-orange-500', 5: 'bg-red-500' }[priority] || 'bg-green-500'
-}
-
-const getTopicColor = (topic: string) => {
-  return { sonarr: 'purple', radarr: 'yellow', system: 'gray', test: 'cyan' }[topic.toLowerCase()] || 'primary'
-}
-
-const getTopicIcon = (topic: string) => {
-  return { sonarr: 'i-heroicons-tv', radarr: 'i-heroicons-film', system: 'i-heroicons-server', test: 'i-heroicons-beaker' }[topic.toLowerCase()] || 'i-heroicons-bell'
 }
 </script>

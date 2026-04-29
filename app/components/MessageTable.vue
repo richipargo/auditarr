@@ -111,19 +111,13 @@ const formatDate = (dateString: string) => {
   })
 }
 
+import { getTopicIcon, getTopicColor } from '~/utils/topicIcons'
+
 const getPriorityLabel = (priority: number) => {
   return { 1: 'Min', 2: 'Low', 3: 'Default', 4: 'High', 5: 'Urgent' }[priority] || 'Default'
 }
 
 const getPriorityColor = (priority: number) => {
   return { 1: 'gray', 2: 'blue', 3: 'green', 4: 'orange', 5: 'red' }[priority] || 'green'
-}
-
-const getTopicColor = (topic: string) => {
-  return { sonarr: 'purple', radarr: 'yellow', system: 'gray', test: 'cyan' }[topic.toLowerCase()] || 'primary'
-}
-
-const getTopicIcon = (topic: string) => {
-  return { sonarr: 'i-heroicons-tv', radarr: 'i-heroicons-film', system: 'i-heroicons-server', test: 'i-heroicons-beaker' }[topic.toLowerCase()] || 'i-heroicons-bell'
 }
 </script>
