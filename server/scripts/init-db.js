@@ -3,8 +3,8 @@
  * Creates tables if they don't exist
  */
 
-const Database = require('better-sqlite3')
-const path = require('path')
+import Database from 'better-sqlite3'
+import path from 'path'
 
 const DB_PATH = process.env.DB_PATH || path.join(process.cwd(), 'data', 'auditarr.db')
 
