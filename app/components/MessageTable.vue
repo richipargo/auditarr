@@ -1,74 +1,71 @@
 <template>
   <UCard>
-    <UTable
-      :data="messages"
-      :columns="columns"
-      @select="(e, row) => $emit('select', row.original)"
-    >
-      <!-- Priority Column -->
+    <UTable :data="messages" :columns="columns" @select="(_, row) => $emit('select', row.original)">
+      <!-- Priority -->
       <template #priority-cell="{ row }">
-        <div class="flex items-center gap-2">
-          <div
-            :class="[
-              'w-2 h-2 rounded-full',
-              getPriorityColor(row.original.priority)
-            ]"
-          />
-          <span class="text-sm">{{ getPriorityLabel(row.original.priority) }}</span>
-        </div>
+        <UBadge
+          :color="getPriorityColor(row.original.priority)"
+          variant="subtle"
+          size="xs"
+        >
+          {{ getPriorityLabel(row.original.priority) }}
+        </UBadge>
       </template>
 
-      <!-- Topic Column -->
+      <!-- Topic -->
       <template #topic-cell="{ row }">
         <UBadge
           :color="getTopicColor(row.original.topic)"
-          variant="subtle"
-          size="sm"
+          variant="soft"
+          size="xs"
         >
           {{ row.original.topic }}
         </UBadge>
       </template>
 
-      <!-- Title Column -->
-      <template #title-cell="{ row }">
-        <div class="flex items-center gap-2">
+      <!-- Message -->
+      <template #message-cell="{ row }">
+        <div class="flex items-start gap-3">
           <UIcon
             :name="getTopicIcon(row.original.topic)"
-            class="w-4 h-4 text-gray-500 flex-shrink-0"
+            class="w-5 h-5 text-gray-400 flex-shrink-0 mt-0.5"
           />
-          <span class="font-medium truncate">
-            {{ row.original.title || row.original.message.substring(0, 50) + '...' }}
-          </span>
+          <div>
+            <p class="font-medium text-gray-900 dark:text-white">
+              {{ row.original.title || truncate(row.original.message, 60) }}
+            </p>
+            <p v-if="!row.original.title" class="text-xs text-gray-500 dark:text-gray-400 mt-1">
+              {{ truncate(row.original.message, 100) }}
+            </p>
+          </div>
         </div>
       </template>
 
-      <!-- Time Column -->
+      <!-- Time -->
       <template #time-cell="{ row }">
-        <span class="text-sm text-gray-600 dark:text-gray-400">
+        <span class="text-xs text-gray-500 dark:text-gray-400 whitespace-nowrap">
           {{ formatDate(row.original.time) }}
         </span>
       </template>
 
-      <!-- Tags Column -->
+      <!-- Tags -->
       <template #tags-cell="{ row }">
-        <div v-if="row.original.tags && row.original.tags.length > 0" class="flex gap-1">
+        <div v-if="row.original.tags?.length" class="flex flex-wrap gap-1">
           <UBadge
             v-for="tag in row.original.tags.slice(0, 2)"
             :key="tag"
             color="gray"
-            variant="soft"
+            variant="subtle"
             size="xs"
           >
             {{ tag }}
           </UBadge>
-          <UBadge
+          <span
             v-if="row.original.tags.length > 2"
-            color="gray"
-            variant="soft"
-            size="xs"
+            class="text-xs text-gray-400"
           >
             +{{ row.original.tags.length - 2 }}
-          </UBadge>
+          </span>
         </div>
       </template>
     </UTable>
@@ -78,24 +75,23 @@
 <script setup lang="ts">
 import type { MessageResponse } from '~/utils/api'
 
-defineProps<{
-  messages: MessageResponse[]
-}>()
+defineProps<{ messages: MessageResponse[] }>()
 
-defineEmits<{
-  select: [message: MessageResponse]
-}>()
+defineEmits<{ select: [message: MessageResponse] }>()
 
-// Table columns
 const columns = [
-  { accessorKey: 'priority', header: 'Priority' },
-  { accessorKey: 'topic', header: 'Topic' },
-  { accessorKey: 'title', header: 'Title' },
-  { accessorKey: 'time', header: 'Time' },
-  { accessorKey: 'tags', header: 'Tags' }
+  { accessorKey: 'priority', header: 'Priority', width: 100 },
+  { accessorKey: 'topic', header: 'Topic', width: 120 },
+  { accessorKey: 'message', header: 'Message' },
+  { accessorKey: 'time', header: 'Time', width: 150 },
+  { accessorKey: 'tags', header: 'Tags', width: 150 }
 ]
 
-// Format date for display
+const truncate = (str: string, length: number) => {
+  if (!str) return ''
+  return str.length > length ? str.substring(0, length) + '...' : str
+}
+
 const formatDate = (dateString: string) => {
   const date = new Date(dateString)
   const now = new Date()
@@ -112,55 +108,24 @@ const formatDate = (dateString: string) => {
   return date.toLocaleDateString(undefined, {
     month: 'short',
     day: 'numeric',
-    year: date.getFullYear() !== now.getFullYear() ? 'numeric' : undefined,
     hour: '2-digit',
     minute: '2-digit'
   })
 }
 
-// Get priority label
 const getPriorityLabel = (priority: number) => {
-  const labels: Record<number, string> = {
-    1: 'Min',
-    2: 'Low',
-    3: 'Default',
-    4: 'High',
-    5: 'Urgent'
-  }
-  return labels[priority] || 'Default'
+  return { 1: 'Min', 2: 'Low', 3: 'Default', 4: 'High', 5: 'Urgent' }[priority] || 'Default'
 }
 
-// Get priority color
 const getPriorityColor = (priority: number) => {
-  const colors: Record<number, string> = {
-    1: 'bg-gray-400',
-    2: 'bg-blue-500',
-    3: 'bg-green-500',
-    4: 'bg-orange-500',
-    5: 'bg-red-500'
-  }
-  return colors[priority] || 'bg-green-500'
+  return { 1: 'gray', 2: 'blue', 3: 'green', 4: 'orange', 5: 'red' }[priority] || 'green'
 }
 
-// Get topic color
 const getTopicColor = (topic: string) => {
-  const colors: Record<string, string> = {
-    sonarr: 'purple',
-    radarr: 'yellow',
-    system: 'gray',
-    test: 'cyan'
-  }
-  return colors[topic.toLowerCase()] || 'primary'
+  return { sonarr: 'purple', radarr: 'yellow', system: 'gray', test: 'cyan' }[topic.toLowerCase()] || 'primary'
 }
 
-// Get topic icon
 const getTopicIcon = (topic: string) => {
-  const icons: Record<string, string> = {
-    sonarr: 'i-heroicons-tv',
-    radarr: 'i-heroicons-film',
-    system: 'i-heroicons-server',
-    test: 'i-heroicons-beaker'
-  }
-  return icons[topic.toLowerCase()] || 'i-heroicons-bell'
+  return { sonarr: 'i-heroicons-tv', radarr: 'i-heroicons-film', system: 'i-heroicons-server', test: 'i-heroicons-beaker' }[topic.toLowerCase()] || 'i-heroicons-bell'
 }
 </script>

@@ -1,8 +1,9 @@
 import { saveMessage, type MessageMetadata } from '../utils/database'
 import { messageMetadataSchema, messageResponseSchema } from '../schemas/message'
+import type { H3Event } from 'h3'
 
 // Extract ntfy.sh-style headers from request
-function extractMetadata(event: any): MessageMetadata {
+function extractMetadata(event: H3Event): MessageMetadata {
   const headers = getHeaders(event)
 
   // ntfy.sh supports multiple header formats (X-Title, Title, etc.)
@@ -56,7 +57,7 @@ function extractMetadata(event: any): MessageMetadata {
   return metadata
 }
 
-export default defineEventHandler(async (event) => {
+export default defineEventHandler(async (event: H3Event) => {
   try {
     const topic = getRouterParam(event, 'topic')
     if (!topic) {

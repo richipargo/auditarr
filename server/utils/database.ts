@@ -1,5 +1,5 @@
 import { db } from '../db'
-import { messages } from '../db/schema'
+import { messages, type Message } from '../db/schema'
 import { eq, desc, and, or, like, gte, lte } from 'drizzle-orm'
 import {
   type MessageMetadata,
@@ -61,7 +61,7 @@ export async function saveMessage(
 }
 
 // Parse message from database row
-function parseMessage(row: any): MessageResponse {
+function parseMessage(row: Message): MessageResponse {
   const parsed = {
     id: row.messageId,
     time: row.createdAt,

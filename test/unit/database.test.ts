@@ -1,34 +1,17 @@
 import { describe, expect, it, beforeAll, afterAll } from 'vitest'
-import { saveMessage, getMessagesByTopic, getAllTopics } from '../../server/utils/database'
+import { saveMessage, getMessagesByTopic, getAllTopics, getFilteredMessages } from '../../server/utils/database'
 import { db } from '../../server/db'
+import { messages } from '../../server/db/schema'
 
 describe('Database Utilities', () => {
   beforeAll(async () => {
     // Clean up database before tests
-    await new Promise((resolve, reject) => {
-      db.run('DELETE FROM messages', (err) => {
-        if (err) {
-          console.error('Error cleaning database:', err)
-          reject(err)
-        } else {
-          resolve()
-        }
-      })
-    })
+    await db.delete(messages)
   })
 
   afterAll(async () => {
     // Clean up database after tests
-    await new Promise((resolve, reject) => {
-      db.run('DELETE FROM messages', (err) => {
-        if (err) {
-          console.error('Error cleaning database:', err)
-          reject(err)
-        } else {
-          resolve()
-        }
-      })
-    })
+    await db.delete(messages)
   })
 
   describe('saveMessage', () => {
@@ -36,12 +19,7 @@ describe('Database Utilities', () => {
       const topic = 'test-topic'
       const message = 'Test message content'
 
-      const result = await new Promise((resolve, reject) => {
-        saveMessage(topic, message, (err, result) => {
-          if (err) reject(err)
-          else resolve(result)
-        })
-      })
+      const result = await saveMessage(topic, message)
 
       expect(result).toBeDefined()
       expect(result.topic).toBe(topic)
@@ -51,21 +29,38 @@ describe('Database Utilities', () => {
       expect(result.time).toBeDefined()
     })
 
-    it('should handle errors gracefully', async () => {
-      // This test is a bit artificial since our current implementation
-      // doesn't have a way to force an error, but we can test the error path
-      // by trying to save with invalid data
-      const result = await new Promise((resolve, _reject) => {
-        saveMessage('', 'test', (err, result) => {
-          if (err) resolve({ err })
-          else resolve({ result })
-        })
-      })
-
-      // Even if it doesn't error, we can verify the callback structure
-      if (result.err) {
-        expect(result.err).toBeInstanceOf(Error)
+    it('should save message with metadata', async () => {
+      const topic = 'test-topic'
+      const message = 'Test message with metadata'
+      const metadata = {
+        title: 'Test Title',
+        priority: 5,
+        tags: ['test', 'important'],
+        click: 'https://example.com',
+        icon: 'https://example.com/icon.png'
       }
+
+      const result = await saveMessage(topic, message, metadata)
+
+      expect(result).toBeDefined()
+      expect(result.topic).toBe(topic)
+      expect(result.message).toBe(message)
+      expect(result.title).toBe(metadata.title)
+      expect(result.priority).toBe(metadata.priority)
+      expect(result.tags).toEqual(metadata.tags)
+      expect(result.click).toBe(metadata.click)
+      expect(result.icon).toBe(metadata.icon)
+    })
+
+    it('should create the topic if it does not exist', async () => {
+      const newTopic = 'new-topic-' + Date.now()
+      const result = await saveMessage(newTopic, 'First message')
+
+      expect(result).toBeDefined()
+
+      // Verify the topic was created by fetching it
+      const topics = await getAllTopics()
+      expect(topics).toContain(newTopic)
     })
   })
 
@@ -76,66 +71,44 @@ describe('Database Utilities', () => {
 
     beforeAll(async () => {
       // Add test messages
-      await new Promise((resolve, reject) => {
-        saveMessage(testTopic, testMessage1, (err) => {
-          if (err) return reject(err)
-          saveMessage(testTopic, testMessage2, (err) => {
-            if (err) reject(err)
-            else resolve()
-          })
-        })
-      })
+      await saveMessage(testTopic, testMessage1)
+      await saveMessage(testTopic, testMessage2)
     })
 
     it('should return messages for a specific topic', async () => {
-      const messages = await new Promise((resolve, reject) => {
-        getMessagesByTopic(testTopic, (err, messages) => {
-          if (err) reject(err)
-          else resolve(messages)
-        })
-      })
+      const retrievedMessages = await getMessagesByTopic(testTopic)
 
-      expect(Array.isArray(messages)).toBe(true)
-      expect(messages.length).toBeGreaterThanOrEqual(2)
+      expect(Array.isArray(retrievedMessages)).toBe(true)
+      expect(retrievedMessages.length).toBeGreaterThanOrEqual(2)
 
       // Check that our test messages are in the results
-      const messageContents = messages.map(m => m.message)
+      const messageContents = retrievedMessages.map(m => m.message)
       expect(messageContents).toContain(testMessage1)
       expect(messageContents).toContain(testMessage2)
 
       // Check message structure
-      messages.forEach(message => {
-        expect(message).toHaveProperty('id')
-        expect(message).toHaveProperty('time')
-        expect(message).toHaveProperty('topic')
-        expect(message).toHaveProperty('message')
-        expect(message).toHaveProperty('event')
+      retrievedMessages.forEach(msg => {
+        expect(msg).toHaveProperty('id')
+        expect(msg).toHaveProperty('time')
+        expect(msg).toHaveProperty('topic')
+        expect(msg).toHaveProperty('message')
+        expect(msg).toHaveProperty('event')
       })
     })
 
     it('should return empty array for non-existent topic', async () => {
-      const messages = await new Promise((resolve, reject) => {
-        getMessagesByTopic('non-existent-topic', (err, messages) => {
-          if (err) reject(err)
-          else resolve(messages)
-        })
-      })
+      const retrievedMessages = await getMessagesByTopic('non-existent-topic')
 
-      expect(Array.isArray(messages)).toBe(true)
-      expect(messages.length).toBe(0)
+      expect(Array.isArray(retrievedMessages)).toBe(true)
+      expect(retrievedMessages.length).toBe(0)
     })
 
     it('should return messages in reverse chronological order', async () => {
-      const messages = await new Promise((resolve, reject) => {
-        getMessagesByTopic(testTopic, (err, messages) => {
-          if (err) reject(err)
-          else resolve(messages)
-        })
-      })
+      const retrievedMessages = await getMessagesByTopic(testTopic)
 
       // Check that messages are ordered by time (newest first)
-      for (let i = 0; i < messages.length - 1; i++) {
-        expect(new Date(messages[i].time) >= new Date(messages[i + 1].time)).toBe(true)
+      for (let i = 0; i < retrievedMessages.length - 1; i++) {
+        expect(new Date(retrievedMessages[i].time) >= new Date(retrievedMessages[i + 1].time)).toBe(true)
       }
     })
   })
@@ -146,24 +119,12 @@ describe('Database Utilities', () => {
 
     beforeAll(async () => {
       // Add messages to different topics
-      await new Promise((resolve, reject) => {
-        saveMessage(topic1, 'Message for topic 1', (err) => {
-          if (err) return reject(err)
-          saveMessage(topic2, 'Message for topic 2', (err) => {
-            if (err) reject(err)
-            else resolve()
-          })
-        })
-      })
+      await saveMessage(topic1, 'Message for topic 1')
+      await saveMessage(topic2, 'Message for topic 2')
     })
 
     it('should return all unique topics', async () => {
-      const topics = await new Promise((resolve, reject) => {
-        getAllTopics((err, topics) => {
-          if (err) reject(err)
-          else resolve(topics)
-        })
-      })
+      const topics = await getAllTopics()
 
       expect(Array.isArray(topics)).toBe(true)
       expect(topics.length).toBeGreaterThanOrEqual(2)
@@ -172,12 +133,7 @@ describe('Database Utilities', () => {
     })
 
     it('should return topics in alphabetical order', async () => {
-      const topics = await new Promise((resolve, reject) => {
-        getAllTopics((err, topics) => {
-          if (err) reject(err)
-          else resolve(topics)
-        })
-      })
+      const topics = await getAllTopics()
 
       // Check that topics are sorted alphabetically
       for (let i = 0; i < topics.length - 1; i++) {
@@ -187,22 +143,54 @@ describe('Database Utilities', () => {
 
     it('should return empty array when no topics exist', async () => {
       // Clean database first
-      await new Promise((resolve, reject) => {
-        db.run('DELETE FROM messages', (err) => {
-          if (err) reject(err)
-          else resolve()
-        })
-      })
+      await db.delete(messages)
 
-      const topics = await new Promise((resolve, reject) => {
-        getAllTopics((err, topics) => {
-          if (err) reject(err)
-          else resolve(topics)
-        })
-      })
+      const topics = await getAllTopics()
 
       expect(Array.isArray(topics)).toBe(true)
       expect(topics.length).toBe(0)
+    })
+  })
+
+  describe('getFilteredMessages', () => {
+    const filterTopic = 'filter-test-topic'
+
+    beforeAll(async () => {
+      // Add test messages with different timestamps
+      await saveMessage(filterTopic, 'Recent message')
+      await saveMessage(filterTopic, 'Old message')
+    })
+
+    it('should return messages filtered by topic', async () => {
+      const result = await getFilteredMessages({ topic: filterTopic })
+
+      expect(Array.isArray(result)).toBe(true)
+      result.forEach(msg => {
+        expect(msg.topic).toBe(filterTopic)
+      })
+    })
+
+    it('should return messages filtered by search', async () => {
+      await saveMessage(filterTopic, 'Message with search keyword')
+
+      const result = await getFilteredMessages({ topic: filterTopic, search: 'keyword' })
+
+      expect(Array.isArray(result)).toBe(true)
+      expect(result.length).toBeGreaterThan(0)
+      expect(result[0].message).toContain('keyword')
+    })
+
+    it('should return messages filtered by date range', async () => {
+      const startDate = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()
+      const endDate = new Date().toISOString()
+
+      const result = await getFilteredMessages({ topic: filterTopic, startDate, endDate })
+
+      expect(Array.isArray(result)).toBe(true)
+      result.forEach(msg => {
+        expect(new Date(msg.time) >= new Date(startDate)).toBe(true)
+        expect(new Date(msg.time) <= new Date(endDate)).toBe(true)
+      })
     })
   })
 
@@ -211,12 +199,7 @@ describe('Database Utilities', () => {
       const topic = 'structure-test'
       const message = 'Structure test message'
 
-      const savedMessage = await new Promise((resolve, reject) => {
-        saveMessage(topic, message, (err, savedMessage) => {
-          if (err) reject(err)
-          else resolve(savedMessage)
-        })
-      })
+      const savedMessage = await saveMessage(topic, message)
 
       expect(savedMessage).toHaveProperty('id')
       expect(savedMessage).toHaveProperty('time')

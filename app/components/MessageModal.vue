@@ -1,103 +1,75 @@
 <template>
-  <UModal v-model:open="isOpen">
+  <UModal v-model:open="isOpen" class="w-full max-w-2xl">
     <template #content>
-      <UCard>
+      <UCard class="p-0 overflow-hidden">
+        <!-- Header -->
         <template #header>
           <div class="flex items-start justify-between gap-4">
-            <div class="flex-1">
+            <div class="flex-1 min-w-0">
               <div class="flex items-center gap-3 mb-2">
-                <!-- Icon/Avatar -->
-                <UAvatar
-                  v-if="message.icon"
-                  :src="message.icon"
-                  size="md"
-                  :alt="message.title || 'Message icon'"
-                />
                 <UIcon
-                  v-else
                   :name="getTopicIcon(message.topic)"
-                  class="w-8 h-8 text-gray-500"
+                  class="w-6 h-6 text-gray-500 flex-shrink-0"
                 />
-
-                <!-- Topic Badge -->
                 <UBadge
                   :color="getTopicColor(message.topic)"
-                  variant="subtle"
+                  variant="soft"
+                  size="sm"
                 >
                   {{ message.topic }}
                 </UBadge>
-
-                <!-- Priority Badge -->
                 <UBadge
-                  v-if="message.priority && message.priority !== 3"
+                  v-if="message.priority !== 3"
                   :color="getPriorityBadgeColor(message.priority)"
-                  variant="subtle"
+                  variant="soft"
+                  size="sm"
                 >
                   {{ getPriorityLabel(message.priority) }}
                 </UBadge>
               </div>
-
-              <!-- Title -->
-              <h3 class="text-xl font-semibold text-gray-900 dark:text-white">
-                {{ message.title || 'Message Details' }}
+              <h3 class="text-lg font-semibold text-gray-900 dark:text-white truncate">
+                {{ message.title || 'Untitled Message' }}
               </h3>
-
-              <!-- Timestamp -->
-              <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">
+              <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
                 {{ formatDate(message.time) }}
               </p>
             </div>
-
-            <!-- Close Button -->
             <UButton
               color="gray"
-              variant="ghost"
+              variant="Ghost"
               icon="i-heroicons-x-mark"
+              class="flex-shrink-0"
               @click="isOpen = false"
             />
           </div>
         </template>
 
-        <!-- Message Content -->
-        <div class="space-y-4">
-          <!-- Priority Indicator Bar -->
-          <div
-            :class="[
-              'h-1 rounded-full w-full',
-              getPriorityColor(message.priority)
-            ]"
-          />
+        <!-- Priority indicator -->
+        <div
+          :class="[getPriorityColor(message.priority), 'h-0.5']"
+        />
 
-          <!-- Message Body -->
+        <!-- Content -->
+        <div class="p-6 space-y-6">
+          <!-- Message -->
           <div class="prose prose-sm dark:prose-invert max-w-none">
             <p class="text-gray-700 dark:text-gray-300 whitespace-pre-wrap">
               {{ message.message }}
             </p>
           </div>
 
-          <!-- Extract and display images from message content -->
-          <div v-if="extractedImages.length > 0" class="space-y-2">
-            <h4 class="text-sm font-semibold text-gray-900 dark:text-white">Attachments</h4>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <img
-                v-for="(img, idx) in extractedImages"
-                :key="idx"
-                :src="img"
-                :alt="`Attachment ${idx + 1}`"
-                class="rounded-lg border border-gray-200 dark:border-gray-700 w-full h-auto"
-              />
-            </div>
-          </div>
-
           <!-- Tags -->
-          <div v-if="message.tags && message.tags.length > 0">
-            <h4 class="text-sm font-semibold text-gray-900 dark:text-white mb-2">Tags</h4>
+          <div v-if="message.tags?.length" class="border-t border-gray-200 dark:border-gray-700 pt-4">
+            <h4 class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3">
+              Tags
+            </h4>
             <div class="flex flex-wrap gap-2">
               <UBadge
                 v-for="tag in message.tags"
                 :key="tag"
                 color="gray"
-                variant="soft"
+                variant="subtle"
+                size="sm"
               >
                 {{ tag }}
               </UBadge>
@@ -106,28 +78,30 @@
 
           <!-- Metadata -->
           <div class="border-t border-gray-200 dark:border-gray-700 pt-4">
-            <h4 class="text-sm font-semibold text-gray-900 dark:text-white mb-3">Metadata</h4>
+            <h4 class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3">
+              Details
+            </h4>
             <dl class="grid grid-cols-2 gap-4 text-sm">
               <div>
-                <dt class="text-gray-600 dark:text-gray-400">Message ID</dt>
-                <dd class="font-mono text-xs text-gray-900 dark:text-white mt-1">
+                <dt class="text-gray-500 dark:text-gray-400">Message ID</dt>
+                <dd class="font-mono text-xs text-gray-900 dark:text-white mt-1 truncate">
                   {{ message.id }}
                 </dd>
               </div>
               <div>
-                <dt class="text-gray-600 dark:text-gray-400">Topic</dt>
-                <dd class="text-gray-900 dark:text-white mt-1">
-                  {{ message.topic }}
-                </dd>
-              </div>
-              <div>
-                <dt class="text-gray-600 dark:text-gray-400">Priority</dt>
+                <dt class="text-gray-500 dark:text-gray-400">Priority</dt>
                 <dd class="text-gray-900 dark:text-white mt-1">
                   {{ getPriorityLabel(message.priority) }} ({{ message.priority }}/5)
                 </dd>
               </div>
               <div>
-                <dt class="text-gray-600 dark:text-gray-400">Timestamp</dt>
+                <dt class="text-gray-500 dark:text-gray-400">Topic</dt>
+                <dd class="text-gray-900 dark:text-white mt-1">
+                  {{ message.topic }}
+                </dd>
+              </div>
+              <div>
+                <dt class="text-gray-500 dark:text-gray-400">Sent</dt>
                 <dd class="text-gray-900 dark:text-white mt-1">
                   {{ new Date(message.time).toLocaleString() }}
                 </dd>
@@ -136,27 +110,31 @@
           </div>
 
           <!-- Actions -->
-          <div v-if="message.actions || message.click" class="border-t border-gray-200 dark:border-gray-700 pt-4">
-            <h4 class="text-sm font-semibold text-gray-900 dark:text-white mb-3">Actions</h4>
+          <div
+            v-if="message.click || message.actions?.length"
+            class="border-t border-gray-200 dark:border-gray-700 pt-4"
+          >
+            <h4 class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3">
+              Actions
+            </h4>
             <div class="flex flex-wrap gap-2">
-              <!-- Click Link -->
               <UButton
                 v-if="message.click"
                 :to="message.click"
                 target="_blank"
                 variant="soft"
+                size="sm"
                 icon="i-heroicons-arrow-top-right-on-square"
               >
                 View Details
               </UButton>
-
-              <!-- Action Buttons -->
               <UButton
                 v-for="(action, idx) in message.actions"
                 :key="idx"
                 :to="action.url"
                 target="_blank"
                 variant="soft"
+                size="sm"
                 :icon="action.action === 'view' ? 'i-heroicons-eye' : 'i-heroicons-cursor-arrow-rays'"
               >
                 {{ action.label }}
@@ -172,9 +150,7 @@
 <script setup lang="ts">
 import type { MessageResponse } from '~/utils/api'
 
-defineOptions({
-  inheritAttrs: false
-})
+defineOptions({ inheritAttrs: false })
 
 const props = defineProps<{
   message: MessageResponse
@@ -190,28 +166,6 @@ const isOpen = computed({
   set: (value) => emit('update:modelValue', value)
 })
 
-// Extract image URLs from message content or metadata
-const extractedImages = computed(() => {
-  if (!props.message) return []
-
-  const images = []
-
-  // Check for icon
-  if (props.message.icon) {
-    images.push(props.message.icon)
-  }
-
-  // Extract URLs from message content that look like images
-  const urlRegex = /(https?:\/\/[^\s]+\.(?:jpg|jpeg|png|gif|webp|svg))/gi
-  const matches = props.message.message.match(urlRegex)
-  if (matches) {
-    images.push(...matches)
-  }
-
-  return [...new Set(images)] // Remove duplicates
-})
-
-// Format date for display
 const formatDate = (dateString: string) => {
   const date = new Date(dateString)
   const now = new Date()
@@ -228,67 +182,28 @@ const formatDate = (dateString: string) => {
   return date.toLocaleDateString(undefined, {
     month: 'short',
     day: 'numeric',
-    year: date.getFullYear() !== now.getFullYear() ? 'numeric' : undefined,
     hour: '2-digit',
     minute: '2-digit'
   })
 }
 
-// Get priority label
 const getPriorityLabel = (priority: number) => {
-  const labels: Record<number, string> = {
-    1: 'Min',
-    2: 'Low',
-    3: 'Default',
-    4: 'High',
-    5: 'Urgent'
-  }
-  return labels[priority] || 'Default'
+  return { 1: 'Min', 2: 'Low', 3: 'Default', 4: 'High', 5: 'Urgent' }[priority] || 'Default'
 }
 
-// Get priority badge color
 const getPriorityBadgeColor = (priority: number) => {
-  const colors: Record<number, string> = {
-    1: 'gray',
-    2: 'blue',
-    3: 'green',
-    4: 'orange',
-    5: 'red'
-  }
-  return colors[priority] || 'green'
+  return { 1: 'gray', 2: 'blue', 3: 'green', 4: 'orange', 5: 'red' }[priority] || 'green'
 }
 
-// Get priority color
 const getPriorityColor = (priority: number) => {
-  const colors: Record<number, string> = {
-    1: 'bg-gray-400',
-    2: 'bg-blue-500',
-    3: 'bg-green-500',
-    4: 'bg-orange-500',
-    5: 'bg-red-500'
-  }
-  return colors[priority] || 'bg-green-500'
+  return { 1: 'bg-gray-500', 2: 'bg-blue-500', 3: 'bg-green-500', 4: 'bg-orange-500', 5: 'bg-red-500' }[priority] || 'bg-green-500'
 }
 
-// Get topic color
 const getTopicColor = (topic: string) => {
-  const colors: Record<string, string> = {
-    sonarr: 'purple',
-    radarr: 'yellow',
-    system: 'gray',
-    test: 'cyan'
-  }
-  return colors[topic.toLowerCase()] || 'primary'
+  return { sonarr: 'purple', radarr: 'yellow', system: 'gray', test: 'cyan' }[topic.toLowerCase()] || 'primary'
 }
 
-// Get topic icon
 const getTopicIcon = (topic: string) => {
-  const icons: Record<string, string> = {
-    sonarr: 'i-heroicons-tv',
-    radarr: 'i-heroicons-film',
-    system: 'i-heroicons-server',
-    test: 'i-heroicons-beaker'
-  }
-  return icons[topic.toLowerCase()] || 'i-heroicons-bell'
+  return { sonarr: 'i-heroicons-tv', radarr: 'i-heroicons-film', system: 'i-heroicons-server', test: 'i-heroicons-beaker' }[topic.toLowerCase()] || 'i-heroicons-bell'
 }
 </script>

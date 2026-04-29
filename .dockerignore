@@ -43,6 +43,11 @@ Thumbs.db
 *.md
 !README.md
 
+# Docker
+!entrypoint.sh
+!Dockerfile
+!docker-compose.yml
+
 # Claude
 .claude
 

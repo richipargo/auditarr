@@ -4,7 +4,7 @@ import MessagesPage from '../../../app/pages/messages.vue'
 
 // Mock $fetch globally
 const mockFetch = vi.fn()
-global.$fetch = mockFetch as any
+global.$fetch = mockFetch
 
 describe('Messages Page', () => {
   beforeEach(() => {
@@ -12,26 +12,7 @@ describe('Messages Page', () => {
     mockFetch.mockResolvedValue([])
   })
 
-  const mockMessages = [
-    {
-      id: '123-abc',
-      topic: 'sonarr',
-      message: 'Episode downloaded',
-      title: 'Episode Downloaded',
-      priority: 3,
-      tags: ['tv', 'download'],
-      time: new Date().toISOString()
-    },
-    {
-      id: '456-def',
-      topic: 'radarr',
-      message: 'Movie grabbed',
-      title: 'Movie Grabbed',
-      priority: 5,
-      tags: ['movie', 'grab'],
-      time: new Date(Date.now() - 3600000).toISOString()
-    }
-  ]
+
 
   it('renders page header', () => {
     render(MessagesPage, {
@@ -143,7 +124,7 @@ describe('Messages Page', () => {
   })
 
   it('displays clear filters button when filters are active', async () => {
-    const { getByText, queryByText } = render(MessagesPage, {
+    const { queryByText } = render(MessagesPage, {
       global: {
         stubs: {
           UContainer: true,

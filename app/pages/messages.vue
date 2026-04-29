@@ -1,35 +1,21 @@
 <template>
   <UContainer class="py-8">
     <!-- Header -->
-    <div class="mb-8">
-      <h1 class="text-3xl font-bold text-gray-900 dark:text-white mb-2">
-        Message Audit Trail
-      </h1>
-      <p class="text-gray-600 dark:text-gray-400">
-        Track and monitor all system notifications and events
-      </p>
+    <div class="flex items-center justify-between mb-8">
+      <div>
+        <h1 class="text-2xl font-bold text-gray-900 dark:text-white">
+          Message Audit Trail
+        </h1>
+        <p class="text-gray-500 dark:text-gray-400 mt-1">
+          All notifications in one place
+        </p>
+      </div>
     </div>
 
-    <!-- Filters Card -->
+    <!-- Filters -->
     <UCard class="mb-6">
-      <template #header>
-        <div class="flex items-center justify-between">
-          <h2 class="text-lg font-semibold">Filters</h2>
-          <UButton
-            v-if="hasActiveFilters"
-            variant="ghost"
-            size="sm"
-            icon="i-heroicons-x-mark"
-            @click="clearFilters"
-          >
-            Clear All
-          </UButton>
-        </div>
-      </template>
-
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <!-- Topic Filter -->
-        <UFormField label="Topic" name="topic">
+        <UFormField label="Topic">
           <USelect
             v-model="filters.topic"
             :items="topicOptions"
@@ -37,17 +23,15 @@
           />
         </UFormField>
 
-        <!-- Search Filter -->
-        <UFormField label="Search" name="search">
+        <UFormField label="Search">
           <UInput
             v-model="filters.search"
             icon="i-heroicons-magnifying-glass"
-            placeholder="Search messages..."
+            placeholder="Search..."
           />
         </UFormField>
 
-        <!-- Start Date Filter -->
-        <UFormField label="Start Date" name="startDate">
+        <UFormField label="From">
           <UInput
             v-model="filters.startDate"
             type="date"
@@ -55,8 +39,7 @@
           />
         </UFormField>
 
-        <!-- End Date Filter -->
-        <UFormField label="End Date" name="endDate">
+        <UFormField label="To">
           <UInput
             v-model="filters.endDate"
             type="date"
@@ -64,81 +47,79 @@
           />
         </UFormField>
       </div>
-    </UCard>
-
-    <!-- Stats Bar -->
-    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-      <UCard>
-        <div class="flex items-center gap-3">
-          <UIcon name="i-heroicons-envelope" class="w-8 h-8 text-primary" />
-          <div>
-            <p class="text-sm text-gray-600 dark:text-gray-400">Total Messages</p>
-            <p class="text-2xl font-bold">{{ messages.length }}</p>
-          </div>
-        </div>
-      </UCard>
-
-      <UCard>
-        <div class="flex items-center gap-3">
-          <UIcon name="i-heroicons-server" class="w-8 h-8 text-blue-500" />
-          <div>
-            <p class="text-sm text-gray-600 dark:text-gray-400">Topics</p>
-            <p class="text-2xl font-bold">{{ topics.length }}</p>
-          </div>
-        </div>
-      </UCard>
-
-      <UCard>
-        <div class="flex items-center gap-3">
-          <UIcon name="i-heroicons-exclamation-triangle" class="w-8 h-8 text-orange-500" />
-          <div>
-            <p class="text-sm text-gray-600 dark:text-gray-400">High Priority</p>
-            <p class="text-2xl font-bold">{{ highPriorityCount }}</p>
-          </div>
-        </div>
-      </UCard>
-
-      <UCard>
-        <div class="flex items-center gap-3">
-          <UIcon name="i-heroicons-clock" class="w-8 h-8 text-green-500" />
-          <div>
-            <p class="text-sm text-gray-600 dark:text-gray-400">Last 24h</p>
-            <p class="text-2xl font-bold">{{ recentCount }}</p>
-          </div>
-        </div>
-      </UCard>
-    </div>
-
-    <!-- Loading State -->
-    <div v-if="loading" class="flex justify-center py-12">
-      <UIcon name="i-heroicons-arrow-path" class="w-8 h-8 animate-spin text-primary" />
-    </div>
-
-    <!-- No Messages State -->
-    <UCard v-else-if="messages.length === 0">
-      <div class="text-center py-12">
-        <UIcon name="i-heroicons-inbox" class="w-16 h-16 mx-auto mb-4 text-gray-400" />
-        <h3 class="text-lg font-semibold mb-2">No messages found</h3>
-        <p class="text-gray-600 dark:text-gray-400 mb-4">
-          Try adjusting your filters or check back later
-        </p>
+      
+      <div class="flex justify-end mt-4">
         <UButton
           v-if="hasActiveFilters"
+          variant="ghost"
+          size="sm"
+          icon="i-heroicons-x-mark"
           @click="clearFilters"
         >
-          Clear Filters
+          Clear
         </UButton>
       </div>
     </UCard>
 
-    <!-- Messages Table -->
-    <MessageTable
-      v-else
-      :messages="messages"
-      @select="openMessageModal"
-    />
+    <!-- Stats -->
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+      <UCard>
+        <div class="text-center">
+          <p class="text-2xl font-semibold">{{ messages.length }}</p>
+          <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Messages</p>
+        </div>
+      </UCard>
+      <UCard>
+        <div class="text-center">
+          <p class="text-2xl font-semibold">{{ topics.length }}</p>
+          <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Topics</p>
+        </div>
+      </UCard>
+      <UCard>
+        <div class="text-center">
+          <p class="text-2xl font-semibold text-orange-600 dark:text-orange-400">{{ highPriorityCount }}</p>
+          <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">High Priority</p>
+        </div>
+      </UCard>
+      <UCard>
+        <div class="text-center">
+          <p class="text-2xl font-semibold text-green-600 dark:text-green-400">{{ recentCount }}</p>
+          <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Recent</p>
+        </div>
+      </UCard>
+    </div>
 
-    <!-- Message Detail Modal -->
+    <!-- Content -->
+    <div class="min-h-[400px]">
+      <!-- Loading -->
+      <div v-if="loading" class="flex items-center justify-center py-12">
+        <UIcon name="i-heroicons-arrow-path" class="w-6 h-6 animate-spin" />
+      </div>
+
+      <!-- Empty -->
+      <div v-else-if="messages.length === 0" class="flex flex-col items-center justify-center py-12 text-center">
+        <UIcon name="i-heroicons-inbox" class="w-12 h-12 text-gray-400 mb-4" />
+        <p class="text-gray-500 dark:text-gray-400">No messages found</p>
+        <UButton
+          v-if="hasActiveFilters"
+          variant="ghost"
+          size="sm"
+          class="mt-4"
+          @click="clearFilters"
+        >
+          Clear filters
+        </UButton>
+      </div>
+
+      <!-- Messages -->
+      <MessageTable
+        v-else
+        :messages="messages"
+        @select="openMessageModal"
+      />
+    </div>
+
+    <!-- Modal -->
     <MessageModal
       v-if="selectedMessage"
       v-model="isModalOpen"
@@ -150,7 +131,6 @@
 <script setup lang="ts">
 import type { MessageFilters } from '~/utils/api'
 
-// Use composables for state management
 const { messages, topics, loading, highPriorityCount, recentCount, loadMessages, loadTopics } = useMessages()
 const { isOpen: isModalOpen, selectedMessage, open: openMessageModal } = useMessageModal()
 
@@ -161,54 +141,33 @@ const filters = ref<MessageFilters & { topic: string }>({
   endDate: ''
 })
 
-// Computed Properties
 const topicOptions = computed(() => [
   { label: 'All Topics', value: 'all' },
-  ...topics.value.map(topic => ({
-    label: topic,
-    value: topic
-  }))
+  ...topics.value.map(topic => ({ label: topic, value: topic }))
 ])
 
-const hasActiveFilters = computed(() => {
-  return !!(
-    (filters.value.topic && filters.value.topic !== 'all') ||
-    filters.value.search ||
-    filters.value.startDate ||
-    filters.value.endDate
-  )
-})
+const hasActiveFilters = computed(() => (
+  (filters.value.topic && filters.value.topic !== 'all') ||
+  filters.value.search ||
+  filters.value.startDate ||
+  filters.value.endDate
+))
 
-// Build filter params from current filters
 const getFilterParams = (): MessageFilters => {
-  const filterParams: MessageFilters = {}
-
-  if (filters.value.topic && filters.value.topic !== 'all') {
-    filterParams.topic = filters.value.topic
-  }
-  if (filters.value.search) filterParams.search = filters.value.search
-  if (filters.value.startDate) filterParams.startDate = filters.value.startDate
-  if (filters.value.endDate) filterParams.endDate = filters.value.endDate
-
-  return filterParams
+  const params: MessageFilters = {}
+  if (filters.value.topic && filters.value.topic !== 'all') params.topic = filters.value.topic
+  if (filters.value.search) params.search = filters.value.search
+  if (filters.value.startDate) params.startDate = filters.value.startDate
+  if (filters.value.endDate) params.endDate = filters.value.endDate
+  return params
 }
 
-// Clear all filters
 const clearFilters = () => {
-  filters.value = {
-    topic: 'all',
-    search: '',
-    startDate: '',
-    endDate: ''
-  }
+  filters.value = { topic: 'all', search: '', startDate: '', endDate: '' }
 }
 
-// Watch for filter changes and refetch messages
-watch(filters, () => {
-  loadMessages(getFilterParams())
-}, { deep: true })
+watch(filters, () => loadMessages(getFilterParams()), { deep: true })
 
-// Initial data load
 onMounted(() => {
   loadTopics()
   loadMessages(getFilterParams())
