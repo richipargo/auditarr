@@ -1,6 +1,5 @@
 CREATE TABLE `messages` (
 	`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
-	`message_id` text NOT NULL,
 	`topic` text NOT NULL,
 	`message` text NOT NULL,
 	`title` text,
@@ -9,8 +8,7 @@ CREATE TABLE `messages` (
 	`click` text,
 	`icon` text,
 	`actions` text,
+	`metadata` text,
 	`event` text DEFAULT 'message' NOT NULL,
-	`created_at` text DEFAULT (CURRENT_TIMESTAMP) NOT NULL
+	`createdAt` integer NOT NULL
 );
---> statement-breakpoint
-CREATE UNIQUE INDEX `messages_message_id_unique` ON `messages` (`message_id`);

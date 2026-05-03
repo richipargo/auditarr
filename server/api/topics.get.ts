@@ -1,15 +1,19 @@
-import { getAllTopics } from '../utils/database'
-import { topicsArraySchema } from '../schemas/message'
+import { topicsArraySchema } from '../schemas/message';
+import { db, schema } from '@nuxthub/db';
 
 export default defineEventHandler(async (event) => {
   try {
-    const topics = await getAllTopics()
+    const results = await db
+      .selectDistinct({ topic: schema.messages.topic })
+      .from(schema.messages)
+      .orderBy(schema.messages.topic);
 
-    // Validate response array with Zod
-    return topicsArraySchema.parse(topics)
+    const topics = results.map(row => row.topic);
+
+    return topicsArraySchema.parse(topics);
   } catch (error) {
-    console.error('Error retrieving topics:', error)
-    setResponseStatus(event, 500)
-    return []
+    console.error('Error retrieving topics:', error);
+    setResponseStatus(event, 500);
+    return [];
   }
-})
+});

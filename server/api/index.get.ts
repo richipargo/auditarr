@@ -1,15 +1,10 @@
-import { getAllTopics } from '../utils/database';
+import { db, schema } from '@nuxthub/db';
 
-export default defineEventHandler(async (event) => {
-  return new Promise((resolve, _reject) => {
-    getAllTopics((err, topics) => {
-      if (err) {
-        console.error('Error retrieving topics:', err);
-        setResponseStatus(event, 500);
-        resolve({ topics: [] });
-      } else {
-        resolve({ topics });
-      }
-    });
-  });
+export default defineEventHandler(async () => {
+  const results = await db
+    .selectDistinct({ topic: schema.messages.topic })
+    .from(schema.messages)
+    .orderBy(schema.messages.topic);
+
+  return results.map(row => row.topic) || [];
 });

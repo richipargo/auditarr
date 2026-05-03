@@ -1,6 +1,6 @@
-import { describe, it, expect } from 'vitest'
-import { render, screen } from '@testing-library/vue'
-import MessageTable from '../../../app/components/MessageTable.vue'
+import { describe, it, expect } from 'vitest';
+import { render, screen } from '@testing-library/vue';
+import { MessageTable } from '#components';
 
 describe('MessageTable', () => {
   const mockMessages = [
@@ -31,81 +31,81 @@ describe('MessageTable', () => {
       tags: ['system', 'backup', 'success'],
       time: new Date('2024-01-14T10:00:00Z').toISOString()
     }
-  ]
+  ];
 
   it('renders table with column headers', () => {
     render(MessageTable, {
       props: {
         messages: mockMessages
       }
-    })
+    });
 
-    expect(screen.getByText('Priority')).toBeTruthy()
-    expect(screen.getByText('Topic')).toBeTruthy()
-    expect(screen.getByText('Title')).toBeTruthy()
-    expect(screen.getByText('Time')).toBeTruthy()
-    expect(screen.getByText('Tags')).toBeTruthy()
-  })
+    expect(screen.getByText('Priority')).toBeTruthy();
+    expect(screen.getByText('Topic')).toBeTruthy();
+    expect(screen.getByText('Title')).toBeTruthy();
+    expect(screen.getByText('Time')).toBeTruthy();
+    expect(screen.getByText('Tags')).toBeTruthy();
+  });
 
   it('displays all message titles', () => {
     render(MessageTable, {
       props: {
         messages: mockMessages
       }
-    })
+    });
 
-    expect(screen.getByText('Episode Downloaded')).toBeTruthy()
-    expect(screen.getByText('Movie Grabbed')).toBeTruthy()
-    expect(screen.getByText('Backup Complete')).toBeTruthy()
-  })
+    expect(screen.getByText('Episode Downloaded')).toBeTruthy();
+    expect(screen.getByText('Movie Grabbed')).toBeTruthy();
+    expect(screen.getByText('Backup Complete')).toBeTruthy();
+  });
 
   it('shows priority labels', () => {
     render(MessageTable, {
       props: {
         messages: mockMessages
       }
-    })
+    });
 
-    expect(screen.getByText('Default')).toBeTruthy()
-    expect(screen.getByText('High')).toBeTruthy()
-    expect(screen.getByText('Low')).toBeTruthy()
-  })
+    expect(screen.getByText('Default')).toBeTruthy();
+    expect(screen.getByText('High')).toBeTruthy();
+    expect(screen.getByText('Low')).toBeTruthy();
+  });
 
   it('displays topic badges', () => {
     render(MessageTable, {
       props: {
         messages: mockMessages
       }
-    })
+    });
 
-    expect(screen.getByText('sonarr')).toBeTruthy()
-    expect(screen.getByText('radarr')).toBeTruthy()
-    expect(screen.getByText('system')).toBeTruthy()
-  })
+    expect(screen.getByText('sonarr')).toBeTruthy();
+    expect(screen.getByText('radarr')).toBeTruthy();
+    expect(screen.getByText('system')).toBeTruthy();
+  });
 
   it('shows individual tags', () => {
     render(MessageTable, {
       props: {
         messages: mockMessages
       }
-    })
+    });
 
-    expect(screen.getByText('tv')).toBeTruthy()
-    expect(screen.getByText('download')).toBeTruthy()
-    expect(screen.getByText('movie')).toBeTruthy()
-    expect(screen.getByText('grab')).toBeTruthy()
-  })
+    expect(screen.getByText('tv')).toBeTruthy();
+    expect(screen.getByText('download')).toBeTruthy();
+    expect(screen.getByText('movie')).toBeTruthy();
+    expect(screen.getByText('grab')).toBeTruthy();
+  });
 
   it('displays tag counter for messages with more than 2 tags', () => {
     render(MessageTable, {
       props: {
         messages: mockMessages
       }
-    })
+    });
 
     // System message has 3 tags, should show +1
-    expect(screen.getByText('+1')).toBeTruthy()
-  })
+    expect(screen.getByText('+1')).toBeTruthy();
+  });
 
   it('truncates long messages when no title', () => {
     const longMessage = {
@@ -116,27 +116,27 @@ describe('MessageTable', () => {
       priority: 3,
       tags: [],
       time: new Date().toISOString()
-    }
+    };
 
     render(MessageTable, {
       props: {
         messages: [longMessage]
       }
-    })
+    });
 
-    expect(screen.getByText(/\.\.\./)).toBeTruthy()
-  })
+    expect(screen.getByText(/\.\.\./)).toBeTruthy();
+  });
 
   it('renders empty table when no messages', () => {
     const { container } = render(MessageTable, {
       props: {
         messages: []
       }
-    })
+    });
 
     // Table should still render structure
-    expect(container.querySelector('table')).toBeTruthy()
-  })
+    expect(container.querySelector('table')).toBeTruthy();
+  });
 
   it('handles messages without tags', () => {
     const messageNoTags = {
@@ -147,41 +147,41 @@ describe('MessageTable', () => {
       priority: 3,
       tags: null,
       time: new Date().toISOString()
-    }
+    };
 
     render(MessageTable, {
       props: {
         messages: [messageNoTags]
       }
-    })
+    });
 
-    expect(screen.getByText('No Tags')).toBeTruthy()
-  })
+    expect(screen.getByText('No Tags')).toBeTruthy();
+  });
 
   it('displays correct number of rows', () => {
     const { container } = render(MessageTable, {
       props: {
         messages: mockMessages
       }
-    })
+    });
 
-    const rows = container.querySelectorAll('tbody tr')
-    expect(rows.length).toBe(mockMessages.length)
-  })
+    const rows = container.querySelectorAll('tbody tr');
+    expect(rows.length).toBe(mockMessages.length);
+  });
 
   it('shows all three priority levels in correct order', () => {
     render(MessageTable, {
       props: {
         messages: mockMessages
       }
-    })
+    });
 
-    const priorityText = screen.getByText('Default')
-    const highText = screen.getByText('High')
-    const lowText = screen.getByText('Low')
+    const priorityText = screen.getByText('Default');
+    const highText = screen.getByText('High');
+    const lowText = screen.getByText('Low');
 
-    expect(priorityText).toBeTruthy()
-    expect(highText).toBeTruthy()
-    expect(lowText).toBeTruthy()
-  })
-})
+    expect(priorityText).toBeTruthy();
+    expect(highText).toBeTruthy();
+    expect(lowText).toBeTruthy();
+  });
+});

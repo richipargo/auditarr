@@ -46,15 +46,18 @@ EXPOSE 3000
 ENV HOST=0.0.0.0
 ENV PORT=3000
 ENV NODE_ENV=production
-ENV DB_PATH=/data/auditarr.db
+ENV DB_PATH=/data
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=3s --start-period=10s --retries=3 \
   CMD node -e "require('http').get('http://localhost:3000/', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"
+#
+# Copy migrations from builder so the CLI can find them
+# NuxtHub looks in server/db/migrations by default
+COPY --from=builder /app/server/db/migrations ./server/db/migrations
 
 # Copy entrypoint script and database init script
 COPY entrypoint.sh /entrypoint.sh
-COPY server/scripts/init-db.js /app/server/scripts/init-db.js
 RUN chmod +x /entrypoint.sh
 
 # Entrypoint handles permissions, database initialization, and starts the app as non-root

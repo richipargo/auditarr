@@ -1,7 +1,7 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "bb13478e-97ce-456a-913f-dbec3288a42d",
+  "id": "72eda91e-f8e6-4703-a43b-c17643472543",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
     "messages": {
@@ -78,6 +78,13 @@
           "notNull": false,
           "autoincrement": false
         },
+        "metadata": {
+          "name": "metadata",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
         "event": {
           "name": "event",
           "type": "text",
@@ -86,13 +93,12 @@
           "autoincrement": false,
           "default": "'message'"
         },
-        "created_at": {
-          "name": "created_at",
-          "type": "text",
+        "createdAt": {
+          "name": "createdAt",
+          "type": "integer",
           "primaryKey": false,
           "notNull": true,
-          "autoincrement": false,
-          "default": "(CURRENT_TIMESTAMP)"
+          "autoincrement": false
         }
       },
       "indexes": {

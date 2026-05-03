@@ -1,6 +1,4 @@
-# CLAUDE.md
-
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+# Agent Instructions
 
 ## Project Overview
 
@@ -106,41 +104,17 @@ docker run -d -p 3000:3000 -v $(pwd)/data:/data auditarr
 - All UI components use `MessageResponse` types
 - Full type safety from database to UI
 
-### Database Layer
+### Database
 
-**Drizzle ORM Configuration:**
-- Uses Drizzle ORM v0.45.1 with better-sqlite3 driver
-- Database file: `./data/auditarr.db` (configurable via `DB_PATH` env var)
-- Schema defined in `server/db/schema.ts`
-- Database connection in `server/db/index.ts`
-- WAL mode enabled for better concurrent access
-- Migrations stored in `server/db/migrations/`
-- Data directory automatically created if it doesn't exist
-
-**Schema (server/db/schema.ts):**
-- Table: `messages` with columns:
-  - `id` (INTEGER PRIMARY KEY AUTOINCREMENT)
-  - `message_id` (TEXT, UNIQUE) - Generated unique ID
-  - `topic` (TEXT) - Message topic/channel
-  - `message` (TEXT) - Message body
-  - `title` (TEXT) - ntfy.sh message title
-  - `priority` (INTEGER, default 3) - Priority level 1-5
-  - `tags` (TEXT) - JSON array of tags
-  - `click` (TEXT) - Click-through URL
-  - `icon` (TEXT) - Icon URL
-  - `actions` (TEXT) - JSON array of action buttons
-  - `event` (TEXT, default 'message')
-  - `created_at` (TEXT, timestamp) - ISO timestamp
-
-**Database Functions (server/utils/database.ts):**
-- All functions are async/Promise-based (no callbacks)
-- Key functions:
-  - `saveMessage(topic, message, metadata)` - Save a message with ntfy.sh metadata
-  - `getMessagesByTopic(topic)` - Retrieve messages for a topic (limit 100)
-  - `getAllTopics()` - Get distinct topics
-  - `getFilteredMessages(filters)` - Get messages with filters (topic, search, date range)
-- MessageMetadata interface: title, priority, tags[], click, icon, actions[]
-- Type-safe queries with full TypeScript support
+- **Database Dialect**: The database dialect is set in the `nuxt.config.ts` file, within the `hub.db` option or `hub.db.dialect` property.
+- **Drizzle Config**: Don't generate the `drizzle.config.ts` file manually, it is generated automatically by NuxtHub.
+- **Generate Migrations**: Use `npx nuxt db generate` to automatically generate database migrations from schema changes
+- **Never Write Manual Migrations**: Do not manually create SQL migration files in the `server/db/migrations/` directory
+- **Workflow**:
+  1. Create or modify the database schema in `server/db/schema.ts` or any other schema file in the `server/db/schema/` directory
+  2. Run `npx nuxt db generate` to generate the migration
+  3. Run `npx nuxt db migrate` to apply the migration to the database, or run `npx nuxt dev` to apply the migration during development
+- **Access the database**: Use the `db` instance from `@nuxthub/db` (or `hub:db` for backwards compatibility) to query the database, it is a Drizzle ORM instance.
 
 ### API Endpoints (server/api/)
 

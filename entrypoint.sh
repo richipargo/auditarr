@@ -13,8 +13,8 @@ fi
 
 # Initialize database schema (idempotent - safe to run always)
 # This runs as root before dropping privileges
-echo "Checking database schema..."
-node /app/server/scripts/init-db.js
+echo "Checking database migrations..."
+gosu node npx nuxt db migrate
 
 # Drop privileges to node user and execute the application
-exec gosu node node .output/server/index.mjs
+exec gosu node "$@"

@@ -1,47 +1,47 @@
-import { fileURLToPath } from 'node:url'
-import { defineConfig } from 'vitest/config'
-import { defineVitestProject } from '@nuxt/test-utils/config'
+import { defineVitestProject } from '@nuxt/test-utils/config';
+import { defineConfig } from 'vitest/config';
 
 export default defineConfig({
   test: {
-    // Use test database for all tests
-    env: {
-      DB_PATH: './data/auditarr.test.db'
-    },
     projects: [
-      {
-        test: {
-          name: 'unit',
-          include: ['test/unit/*.{test,spec}.ts'],
-          environment: 'node',
-        },
-      },
-      {
+      await defineVitestProject({
         test: {
           name: 'api',
           include: ['test/api/*.{test,spec}.ts'],
           environment: 'nuxt',
           fileParallelism: false,
-          environmentOptions: {
-            nuxt: {
-              rootDir: fileURLToPath(new URL('.', import.meta.url)),
-              domEnvironment: 'happy-dom',
-            },
-          },
         },
-      },
+        // FIXME: Temporary fix for a bun issue
+        plugins: [
+          {
+            name: 'ignore-bun-test',
+            enforce: 'pre',
+            resolveId(id) {
+              if (id === 'bun:test') {
+                return { id: 'bun:test', external: true };
+              }
+            }
+          }
+        ]
+      }),
       await defineVitestProject({
         test: {
           name: 'nuxt',
           include: ['test/nuxt/*.{test,spec}.ts'],
           environment: 'nuxt',
-          environmentOptions: {
-            nuxt: {
-              rootDir: fileURLToPath(new URL('.', import.meta.url)),
-              domEnvironment: 'happy-dom',
-            },
-          },
         },
+        // FIXME: Temporary fix for a bun issue
+        plugins: [
+          {
+            name: 'ignore-bun-test',
+            enforce: 'pre',
+            resolveId(id) {
+              if (id === 'bun:test') {
+                return { id: 'bun:test', external: true };
+              }
+            }
+          }
+        ]
       }),
     ],
     coverage: {
@@ -49,4 +49,4 @@ export default defineConfig({
       provider: 'v8',
     },
   },
-})
+});
