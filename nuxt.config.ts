@@ -11,8 +11,11 @@ export default defineNuxtConfig({
   compatibilityDate: '2025-07-15',
   css: ['~/assets/css/main.css'],
   devtools: { enabled: true },
-
-
+  eslint: {
+    config: {
+      stylistic: true,
+    }
+  },
   modules: [
     '@nuxt/a11y',
     '@nuxt/eslint',

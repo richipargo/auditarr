@@ -3,8 +3,8 @@ import { messageMetadataSchema, messageResponseSchema, type RichMetadata } from 
 import type { H3Event } from 'h3'
 
 // Extract ntfy.sh-style headers from request
-function extractMetadata(event: H3Event): MessageMetadata {
-  const headers = getHeaders(event)
+async function extractMetadata(event: H3Event): Promise<MessageMetadata> {
+  const headers = getHeaders(event);
 
   // ntfy.sh supports multiple header formats (X-Title, Title, etc.)
   const getHeader = (names: string[]) => {
@@ -152,7 +152,10 @@ export default defineEventHandler(async (event: H3Event) => {
       return { error: 'Topic is required' }
     }
 
-    const body = await readRawBody(event)
+    const body = await readRawBody(event);
+    const headers = getHeaders(event);
+    console.log(headers, body);
+
     const message = body?.toString() || ''
 
     // Extract ntfy.sh headers
