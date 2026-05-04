@@ -1,5 +1,5 @@
 # Build stage
-FROM node:22-alpine AS builder
+FROM node:22-bookworm AS builder
 
 WORKDIR /app
 
@@ -16,10 +16,10 @@ COPY . .
 RUN npm run build
 
 # Production stage
-FROM node:22-alpine AS runner
+FROM node:22-bookworm AS runner
 
 # Install gosu for privilege dropping
-RUN apk add --no-cache gosu
+RUN apt-get update && apt-get install -y --no-install-recommends gosu && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
 
@@ -63,3 +63,4 @@ RUN chmod +x /entrypoint.sh
 # Entrypoint handles permissions, database initialization, and starts the app as non-root
 ENTRYPOINT ["/entrypoint.sh"]
 CMD ["node", ".output/server/index.mjs"]
+
