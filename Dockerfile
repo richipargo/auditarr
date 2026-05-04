@@ -37,7 +37,7 @@ RUN npm ci --omit=dev
 COPY --from=builder /app/.output ./.output
 
 # Create data directory for database
-RUN mkdir -p /data && chown node:node /data
+RUN mkdir -p /app/data && chown node:node /app/data
 
 # Expose port
 EXPOSE 3000
@@ -46,7 +46,6 @@ EXPOSE 3000
 ENV HOST=0.0.0.0
 ENV PORT=3000
 ENV NODE_ENV=production
-ENV DB_PATH=/data
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=3s --start-period=10s --retries=3 \
