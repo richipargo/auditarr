@@ -5,7 +5,7 @@ import { join } from 'path'
 const DB_PATH = process.env.DB_PATH || join(process.cwd(), 'data', 'auditarr.db')
 
 export default defineConfig({
-  schema: './server/db/schema.ts',
+  schema: './server/db/schema.sqlite.ts',
   out: './server/db/migrations',
   dialect: 'sqlite',
   dbCredentials: {

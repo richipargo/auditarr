@@ -1,4 +1,4 @@
-import { sqliteTable, text, integer } from 'drizzle-orm/sqlite-core';
+import { sqliteTable, text, integer, index } from 'drizzle-orm/sqlite-core';
 
 export const messages = sqliteTable('messages', {
   id: integer('id').primaryKey({ autoIncrement: true }),
@@ -13,7 +13,11 @@ export const messages = sqliteTable('messages', {
   metadata: text('metadata'),
   event: text('event').default('message').notNull(),
   createdAt: integer({ mode: 'timestamp' }).notNull(),
-});
+}, (table) => [
+  index('messages_topic_idx').on(table.topic),
+  index('messages_created_at_idx').on(table.createdAt),
+  index('messages_priority_idx').on(table.priority),
+]);
 
 export type Message = typeof messages.$inferSelect
 export type NewMessage = typeof messages.$inferInsert

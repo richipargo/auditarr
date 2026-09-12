@@ -1,6 +1,7 @@
 import { messageFiltersSchema, messagesArraySchema } from '../schemas/message';
 import { db, schema } from '@nuxthub/db';
 import { and, desc, eq, gte, like, lte, or } from 'drizzle-orm';
+import { toMessageResponseList } from '../utils/messages';
 
 export default defineEventHandler(async (event) => {
   try {
@@ -50,7 +51,7 @@ export default defineEventHandler(async (event) => {
       ? await q.where(and(...conditions))
       : await q;
 
-    return messagesArraySchema.parse(results);
+    return messagesArraySchema.parse(toMessageResponseList(results));
   } catch (error) {
     console.error('Error retrieving messages:', error);
     setResponseStatus(event, 500);

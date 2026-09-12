@@ -19,7 +19,7 @@ export default defineNuxtConfig({
   },
   css: ['~/assets/css/main.css'],
   runtimeConfig: {
-    dbPath: 'data',
+    dbPath: 'data/auditarr.db',
   },
   compatibilityDate: '2025-07-15',
   nitro: {

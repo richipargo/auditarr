@@ -9,7 +9,7 @@
               <div class="flex items-center gap-3 mb-2">
                 <UIcon
                   :name="getTopicIcon(message.topic)"
-                  class="w-6 h-6 text-gray-500 flex-shrink-0"
+                  class="w-6 h-6 text-dimmed flex-shrink-0"
                 />
                 <UBadge
                   :color="getTopicColor(message.topic)"
@@ -27,16 +27,16 @@
                   {{ getPriorityLabel(message.priority) }}
                 </UBadge>
               </div>
-              <h3 class="text-lg font-semibold text-gray-900 dark:text-white truncate">
+              <h3 class="text-lg font-semibold text-highlighted truncate">
                 {{ message.title || 'Untitled Message' }}
               </h3>
-              <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
+              <p class="text-sm text-muted mt-1">
                 {{ formatDate(message.time) }}
               </p>
             </div>
             <UButton
               color="gray"
-              variant="Ghost"
+              variant="ghost"
               icon="i-heroicons-x-mark"
               class="flex-shrink-0"
               @click="isOpen = false"
@@ -53,14 +53,14 @@
         <div class="p-6 space-y-6">
           <!-- Message -->
           <div class="prose dark:prose-invert max-w-none text-base">
-            <p class="text-gray-700 dark:text-gray-300 whitespace-pre-wrap">
+            <p class="text-default whitespace-pre-wrap">
               {{ message.message }}
             </p>
           </div>
 
           <!-- Images -->
-          <div v-if="extractedImages.length > 0" class="border-t border-gray-200 dark:border-gray-700 pt-4">
-            <h4 class="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3">
+          <div v-if="extractedImages.length > 0" class="border-t border-muted pt-4">
+            <h4 class="text-sm font-semibold text-dimmed uppercase tracking-wider mb-3">
               Images
             </h4>
             <div class="flex flex-wrap gap-4">
@@ -68,15 +68,15 @@
                 v-for="(img, idx) in extractedImages"
                 :key="idx"
                 :src="img"
-                class="max-w-48 max-h-48 rounded-lg border border-gray-200 dark:border-gray-700 object-contain"
+                class="max-w-48 max-h-48 rounded-lg border border-muted object-contain"
                 @error="handleImageError(idx)"
               />
             </div>
           </div>
 
           <!-- External Links -->
-          <div v-if="extractedLinks.length > 0" class="border-t border-gray-200 dark:border-gray-700 pt-4">
-            <h4 class="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3">
+          <div v-if="extractedLinks.length > 0" class="border-t border-muted pt-4">
+            <h4 class="text-sm font-semibold text-dimmed uppercase tracking-wider mb-3">
               Links
             </h4>
             <div class="flex flex-wrap gap-2">
@@ -95,15 +95,15 @@
           </div>
 
           <!-- Tags -->
-          <div v-if="message.tags?.length" class="border-t border-gray-200 dark:border-gray-700 pt-4">
-            <h4 class="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3">
+          <div v-if="message.tags?.length" class="border-t border-muted pt-4">
+            <h4 class="text-sm font-semibold text-dimmed uppercase tracking-wider mb-3">
               Tags
             </h4>
             <div class="flex flex-wrap gap-2">
               <UBadge
                 v-for="tag in message.tags"
                 :key="tag"
-                color="gray"
+                color="neutral"
                 variant="subtle"
                 size="sm"
               >
@@ -113,32 +113,32 @@
           </div>
 
           <!-- Metadata -->
-          <div class="border-t border-gray-200 dark:border-gray-700 pt-4">
-            <h4 class="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3">
+          <div class="border-t border-muted pt-4">
+            <h4 class="text-sm font-semibold text-dimmed uppercase tracking-wider mb-3">
               Details
             </h4>
             <dl class="grid grid-cols-2 gap-4 text-sm">
               <div>
-                <dt class="text-sm text-gray-500 dark:text-gray-400">Message ID</dt>
-                <dd class="font-mono text-sm text-gray-900 dark:text-white mt-1 truncate">
+                <dt class="text-sm text-muted">Message ID</dt>
+                <dd class="font-mono text-sm text-highlighted mt-1 truncate">
                   {{ message.id }}
                 </dd>
               </div>
               <div>
-                <dt class="text-sm text-gray-500 dark:text-gray-400">Priority</dt>
-                <dd class="text-sm text-gray-900 dark:text-white mt-1">
+                <dt class="text-sm text-muted">Priority</dt>
+                <dd class="text-sm text-highlighted mt-1">
                   {{ getPriorityLabel(message.priority) }} ({{ message.priority }}/5)
                 </dd>
               </div>
               <div>
-                <dt class="text-sm text-gray-500 dark:text-gray-400">Topic</dt>
-                <dd class="text-sm text-gray-900 dark:text-white mt-1">
+                <dt class="text-sm text-muted">Topic</dt>
+                <dd class="text-sm text-highlighted mt-1">
                   {{ message.topic }}
                 </dd>
               </div>
               <div>
-                <dt class="text-sm text-gray-500 dark:text-gray-400">Sent</dt>
-                <dd class="text-sm text-gray-900 dark:text-white mt-1">
+                <dt class="text-sm text-muted">Sent</dt>
+                <dd class="text-sm text-highlighted mt-1">
                   {{ new Date(message.time).toLocaleString() }}
                 </dd>
               </div>
@@ -148,108 +148,108 @@
           <!-- Rich Metadata (Radarr/Sonarr) -->
           <div
             v-if="message.metadata && Object.keys(message.metadata).length > 0"
-            class="border-t border-gray-200 dark:border-gray-700 pt-4"
+            class="border-t border-muted pt-4"
           >
-            <h4 class="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3">
+            <h4 class="text-sm font-semibold text-dimmed uppercase tracking-wider mb-3">
               Media Info
             </h4>
             <dl class="grid grid-cols-2 gap-4 text-sm">
               <!-- Quality -->
               <div v-if="message.metadata?.quality">
-                <dt class="text-sm text-gray-500 dark:text-gray-400">Quality</dt>
-                <dd class="text-sm text-gray-900 dark:text-white mt-1">
+                <dt class="text-muted">Quality</dt>
+                <dd class="text-sm text-highlighted mt-1">
                   {{ message.metadata.quality }}
                 </dd>
               </div>
 
               <!-- Size -->
               <div v-if="message.metadata?.size">
-                <dt class="text-sm text-gray-500 dark:text-gray-400">Size</dt>
-                <dd class="text-sm text-gray-900 dark:text-white mt-1">
+                <dt class="text-muted">Size</dt>
+                <dd class="text-sm text-highlighted mt-1">
                   {{ message.metadata.size }}
                 </dd>
               </div>
 
               <!-- Release Group -->
               <div v-if="message.metadata?.releaseGroup">
-                <dt class="text-sm text-gray-500 dark:text-gray-400">Release Group</dt>
-                <dd class="text-sm text-gray-900 dark:text-white mt-1">
+                <dt class="text-muted">Release Group</dt>
+                <dd class="text-sm text-highlighted mt-1">
                   {{ message.metadata.releaseGroup }}
                 </dd>
               </div>
 
               <!-- Indexer -->
               <div v-if="message.metadata?.indexer">
-                <dt class="text-sm text-gray-500 dark:text-gray-400">Indexer</dt>
-                <dd class="text-sm text-gray-900 dark:text-white mt-1">
+                <dt class="text-muted">Indexer</dt>
+                <dd class="text-sm text-highlighted mt-1">
                   {{ message.metadata.indexer }}
                 </dd>
               </div>
 
               <!-- Download Client -->
               <div v-if="message.metadata?.downloadClient">
-                <dt class="text-sm text-gray-500 dark:text-gray-400">Download Client</dt>
-                <dd class="text-sm text-gray-900 dark:text-white mt-1">
+                <dt class="text-muted">Download Client</dt>
+                <dd class="text-sm text-highlighted mt-1">
                   {{ message.metadata.downloadClient }}
                 </dd>
               </div>
 
               <!-- Source -->
               <div v-if="message.metadata?.source">
-                <dt class="text-sm text-gray-500 dark:text-gray-400">Source</dt>
-                <dd class="text-sm text-gray-900 dark:text-white mt-1">
+                <dt class="text-muted">Source</dt>
+                <dd class="text-sm text-highlighted mt-1">
                   {{ message.metadata.source }}
                 </dd>
               </div>
 
               <!-- Series/Movie Info -->
               <div v-if="message.metadata?.seriesName">
-                <dt class="text-sm text-gray-500 dark:text-gray-400">Series</dt>
-                <dd class="text-sm text-gray-900 dark:text-white mt-1">
+                <dt class="text-muted">Series</dt>
+                <dd class="text-sm text-highlighted mt-1">
                   {{ message.metadata.seriesName }}
                 </dd>
               </div>
 
               <div v-if="message.metadata?.episodeTitle">
-                <dt class="text-sm text-gray-500 dark:text-gray-400">Episode</dt>
-                <dd class="text-sm text-gray-900 dark:text-white mt-1">
+                <dt class="text-muted">Episode</dt>
+                <dd class="text-sm text-highlighted mt-1">
                   {{ message.metadata.episodeTitle }}
                 </dd>
               </div>
 
               <div v-if="message.metadata?.episodeNumber || message.metadata?.seasonNumber">
-                <dt class="text-sm text-gray-500 dark:text-gray-400">Episode #</dt>
-                <dd class="text-sm text-gray-900 dark:text-white mt-1">
+                <dt class="text-muted">Episode #</dt>
+                <dd class="text-sm text-highlighted mt-1">
                   S{{ message.metadata.seasonNumber }}E{{ message.metadata.episodeNumber }}
                 </dd>
               </div>
 
               <div v-if="message.metadata?.movieTitle">
-                <dt class="text-sm text-gray-500 dark:text-gray-400">Movie</dt>
-                <dd class="text-sm text-gray-900 dark:text-white mt-1">
+                <dt class="text-muted">Movie</dt>
+                <dd class="text-sm text-highlighted mt-1">
                   {{ message.metadata.movieTitle }}
                 </dd>
               </div>
 
               <div v-if="message.metadata?.movieYear">
-                <dt class="text-sm text-gray-500 dark:text-gray-400">Year</dt>
-                <dd class="text-sm text-gray-900 dark:text-white mt-1">
+                <dt class="text-muted">Year</dt>
+                <dd class="text-sm text-highlighted mt-1">
                   {{ message.metadata.movieYear }}
                 </dd>
               </div>
 
               <!-- Custom Format Score -->
               <div v-if="message.metadata?.customFormatScore">
-                <dt class="text-sm text-gray-500 dark:text-gray-400">CF Score</dt>
-                <dd class="text-sm text-gray-900 dark:text-white mt-1">
+                <dt class="text-muted">CF Score</dt>
+                <dd class="text-sm text-highlighted mt-1">
                   {{ message.metadata.customFormatScore }}
                 </dd>
               </div>
 
               <!-- File Name -->
               <div v-if="message.metadata?.fileName">
-                <dt class="text-sm text-gray-500 dark:text-gray-400">File Name</dt>
-                <dd class="font-mono text-sm text-gray-900 dark:text-white mt-1 truncate">
+                <dt class="text-muted">File Name</dt>
+                <dd class="font-mono text-sm text-highlighted mt-1 truncate">
                   {{ message.metadata.fileName }}
                 </dd>
               </div>
@@ -259,9 +259,9 @@
           <!-- Actions -->
           <div
             v-if="message.click || message.actions?.length"
-            class="border-t border-gray-200 dark:border-gray-700 pt-4"
+            class="border-t border-muted pt-4"
           >
-            <h4 class="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3">
+            <h4 class="text-sm font-semibold text-dimmed uppercase tracking-wider mb-3">
               Actions
             </h4>
             <div class="flex flex-wrap gap-2">

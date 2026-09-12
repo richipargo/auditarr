@@ -26,13 +26,13 @@
         <div class="flex items-start gap-3">
           <UIcon
             :name="getTopicIcon(row.original.topic)"
-            class="w-5 h-5 text-gray-400 flex-shrink-0 mt-0.5"
+            class="w-5 h-5 text-dimmed flex-shrink-0 mt-0.5"
           />
           <div>
-            <p class="font-medium text-gray-900 dark:text-white">
+            <p class="font-medium text-highlighted">
               {{ row.original.title || truncate(row.original.message, 80) }}
             </p>
-            <p v-if="!row.original.title" class="text-sm text-gray-500 dark:text-gray-400 mt-1">
+            <p v-if="!row.original.title" class="text-sm text-muted mt-1">
               {{ truncate(row.original.message, 120) }}
             </p>
           </div>
@@ -41,7 +41,7 @@
 
       <!-- Time -->
       <template #time-cell="{ row }">
-        <span class="text-sm text-gray-500 dark:text-gray-400 whitespace-nowrap">
+        <span class="text-sm text-muted whitespace-nowrap">
           {{ formatDate(row.original.time) }}
         </span>
       </template>
@@ -52,7 +52,7 @@
           <UBadge
             v-for="tag in row.original.tags.slice(0, 2)"
             :key="tag"
-            color="gray"
+            color="neutral"
             variant="subtle"
             size="sm"
           >
@@ -60,7 +60,7 @@
           </UBadge>
           <span
             v-if="row.original.tags.length > 2"
-            class="text-sm text-gray-400"
+            class="text-sm text-dimmed"
           >
             +{{ row.original.tags.length - 2 }}
           </span>

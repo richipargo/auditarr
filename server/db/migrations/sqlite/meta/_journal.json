@@ -15,6 +15,13 @@
       "when": 1777832833044,
       "tag": "0001_ambitious_lady_vermin",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1789197252550,
+      "tag": "0002_overconfident_meltdown",
+      "breakpoints": true
     }
   ]
 }

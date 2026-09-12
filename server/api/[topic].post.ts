@@ -1,11 +1,13 @@
 import { db, schema } from '@nuxthub/db';
-import { messageMetadataSchema, messageResponseSchema, type RichMetadata } from '../schemas/message';
-import { appendFileSync, mkdirSync, existsSync } from 'fs';
+import { messageMetadataSchema, messageResponseSchema, type MessageMetadata, type RichMetadata } from '../schemas/message';
+import { appendFile, mkdir } from 'fs/promises';
 import { join, dirname } from 'path';
 import type { H3Event } from 'h3';
+import { toMessageResponse } from '../utils/messages';
+import { eq, desc } from 'drizzle-orm';
 
 // Extract ntfy.sh-style headers from request
-async function extractMetadata(event: H3Event): Promise<MessageMetadata> {
+function extractMetadata(event: H3Event): MessageMetadata {
   const headers = getHeaders(event);
 
   // ntfy.sh supports multiple header formats (X-Title, Title, etc.)
@@ -160,12 +162,9 @@ export default defineEventHandler(async (event: H3Event) => {
     const headers = getHeaders(event);
 
     const logDir = dirname(dbPath);
-    if (!existsSync(logDir)) {
-      mkdirSync(logDir, { recursive: true });
-    }
-    // TODO: check path
+    await mkdir(logDir, { recursive: true });
     const logFilePath = join(logDir, 'post-requests.log');
-    appendFileSync(logFilePath, `[${new Date().toISOString()}] Headers: ${JSON.stringify(headers)}\nBody: ${body?.toString() || ''}\n\n`);
+    await appendFile(logFilePath, `[${new Date().toISOString()}] Headers: ${JSON.stringify(headers)}\nBody: ${body?.toString() || ''}\n\n`);
 
     const message = body?.toString() || '';
 
@@ -175,21 +174,35 @@ export default defineEventHandler(async (event: H3Event) => {
     // Validate metadata with Zod
     const validatedMetadata = messageMetadataSchema.parse(metadata);
 
-    console.log(`[${new Date().toISOString()}] Publishing to topic "${topic}":`, {
-      message: message.substring(0, 100),
-      metadata: validatedMetadata,
-    });
-
-    // TODO: remember to dismiss if no content
-    const result = await db.insert(schema.messages).values({
+    // Insert message with all persisted metadata
+    await db.insert(schema.messages).values({
       topic,
       message,
-      event: 'asdfsf',
-      // validatedMetadata,
+      title: validatedMetadata.title,
+      priority: validatedMetadata.priority,
+      tags: validatedMetadata.tags ? JSON.stringify(validatedMetadata.tags) : null,
+      click: validatedMetadata.click,
+      icon: validatedMetadata.icon,
+      actions: validatedMetadata.actions ? JSON.stringify(validatedMetadata.actions) : null,
+      metadata: validatedMetadata.metadata ? JSON.stringify(validatedMetadata.metadata) : null,
+      event: 'message',
+      createdAt: new Date(),
     });
 
-    // Validate response with Zod
-    return messageResponseSchema.parse(result);
+    // Query the most recently inserted message for this topic
+    const inserted = await db.select()
+      .from(schema.messages)
+      .where(eq(schema.messages.topic, topic))
+      .orderBy(desc(schema.messages.id))
+      .limit(1)
+      .then(rows => rows[0]);
+
+    if (!inserted) {
+      setResponseStatus(event, 500);
+      return { error: 'Failed to retrieve inserted message' };
+    }
+
+    return messageResponseSchema.parse(toMessageResponse(inserted));
   } catch (error) {
     console.error('Error saving message to database:', error);
     setResponseStatus(event, 500);

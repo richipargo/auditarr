@@ -1,6 +1,7 @@
 import { messagesArraySchema } from '../schemas/message';
 import { db, schema } from '@nuxthub/db';
-import { eq } from 'drizzle-orm';
+import { eq, desc } from 'drizzle-orm';
+import { toMessageResponseList } from '../utils/messages';
 
 export default defineEventHandler(async (event) => {
   try {
@@ -12,9 +13,11 @@ export default defineEventHandler(async (event) => {
 
     const messages = await db.select()
       .from(schema.messages)
-      .where(eq(schema.messages.topic, topic));
+      .where(eq(schema.messages.topic, topic))
+      .orderBy(desc(schema.messages.createdAt))
+      .limit(100);
 
-    return messagesArraySchema.parse(messages);
+    return messagesArraySchema.parse(toMessageResponseList(messages));
   }
   catch (error) {
     console.error('Error retrieving messages:', error);

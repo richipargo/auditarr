@@ -1,28 +1,31 @@
 <template>
-  <div class="min-h-screen flex flex-col">
-    <UHeader class="border-b border-gray-200 dark:border-gray-800">
-      <template #logo>
-        <NuxtLink to="/" class="flex items-center gap-2 hover:opacity-80 transition-opacity">
-          <UIcon name="i-heroicons-shield-check" class="w-6 h-6" />
-          <span class="font-bold text-xl">AuditArr</span>
-        </NuxtLink>
-      </template>
+  <UApp>
+    <div class="min-h-screen flex flex-col bg-default">
+      <UHeader>
+        <template #logo>
+          <NuxtLink to="/" class="flex items-center gap-2.5 hover:opacity-80 transition-opacity">
+            <UIcon name="i-heroicons-shield-check" class="w-5 h-5 text-primary" />
+            <span class="font-semibold text-lg tracking-tight">AuditArr</span>
+          </NuxtLink>
+        </template>
 
-      <template #right>
-        <UButton
-          to="/messages"
-          variant="ghost"
-          icon="i-heroicons-inbox"
-          label="Messages"
-        />
-        <UColorModeButton />
-      </template>
-    </UHeader>
+        <template #right>
+          <UButton
+            to="/messages"
+            variant="ghost"
+            color="neutral"
+            icon="i-heroicons-inbox"
+            label="Messages"
+          />
+          <UColorModeButton />
+        </template>
+      </UHeader>
 
-    <NuxtRouteAnnouncer />
+      <NuxtRouteAnnouncer />
 
-    <UMain class="flex-1">
-      <NuxtPage />
-    </UMain>
-  </div>
+      <UMain class="flex-1">
+        <NuxtPage />
+      </UMain>
+    </div>
+  </UApp>
 </template>
