@@ -21,6 +21,15 @@ export default defineNuxtConfig({
   runtimeConfig: {
     dbPath: 'data/auditarr.db',
   },
+  icon: {
+    serverBundle: {
+      collections: ['heroicons', 'lucide', 'simple-icons'],
+    },
+    clientBundle: {
+      scan: true,
+      sizeLimit: 512,
+    },
+  },
   compatibilityDate: '2025-07-15',
   nitro: {
     experimental: {

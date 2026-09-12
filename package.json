@@ -35,6 +35,7 @@
   },
   "devDependencies": {
     "@iconify-json/lucide": "^1.2.105",
+    "@iconify-json/simple-icons": "^1.2.95",
     "@libsql/client": "^0.17.3",
     "@testing-library/vue": "^8.1.0",
     "@types/node": "^25.6.0",
