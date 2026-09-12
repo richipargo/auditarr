@@ -36,8 +36,16 @@ RUN npm ci --omit=dev
 # Copy built application from builder
 COPY --from=builder /app/.output ./.output
 
+# Copy nuxt config files (needed by nuxt prepare during db migrate)
+COPY --from=builder /app/nuxt.config.ts ./nuxt.config.ts
+COPY --from=builder /app/app/app.config.ts ./app/app.config.ts
+COPY --from=builder /app/tsconfig.json ./tsconfig.json
+
 # Create data directory for database
 RUN mkdir -p /app/data && chown node:node /app/data
+
+# Ensure node user can write to /app (needed by nuxt prepare during db migrate)
+RUN chown -R node:node /app
 
 # Expose port
 EXPOSE 3000
