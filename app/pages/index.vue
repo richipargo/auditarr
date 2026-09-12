@@ -18,7 +18,7 @@
           size="lg"
           variant="outline"
           color="neutral"
-          icon="i-heroicons-terminal"
+          icon="i-lucide-terminal"
           @click="copyCurl"
         >
           {{ copied ? 'Copied' : 'Try it now' }}

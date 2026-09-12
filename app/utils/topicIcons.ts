@@ -28,7 +28,7 @@ export const topicIcons: Record<string, string> = {
   system: 'i-heroicons-cpu-chip',
   services: 'i-heroicons-server-stack',
   backup: 'i-heroicons-archive-box-arrow-down',
-  health: 'i-heroicons-heart-pulse',
+  health: 'i-lucide-heart-pulse',
   
   // Generic fallback
   test: 'i-heroicons-beaker',
