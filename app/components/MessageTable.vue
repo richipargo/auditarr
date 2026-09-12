@@ -1,41 +1,41 @@
 <template>
   <UCard>
     <UTable :data="messages" :columns="columns" @select="(_, row) => $emit('select', row.original)">
-      <!-- Priority -->
+      <!-- Priority — just a colored dot -->
       <template #priority-cell="{ row }">
-        <UBadge
-          :color="getPriorityColor(row.original.priority)"
-          variant="subtle"
-        >
-          {{ getPriorityLabel(row.original.priority) }}
-        </UBadge>
+        <span
+          :class="getPriorityDotClass(row.original.priority)"
+          class="inline-block w-2.5 h-2.5 rounded-full"
+          :title="getPriorityLabel(row.original.priority)"
+        />
       </template>
 
-      <!-- Topic -->
+      <!-- Topic — brand icon + name -->
       <template #topic-cell="{ row }">
-        <UBadge
-          :color="getTopicColor(row.original.topic)"
-          variant="soft"
-        >
-          {{ row.original.topic }}
-        </UBadge>
-      </template>
-
-      <!-- Message -->
-      <template #message-cell="{ row }">
-        <div class="flex items-start gap-3">
+        <div class="flex items-center gap-2">
           <UIcon
             :name="getTopicIcon(row.original.topic)"
-            class="w-5 h-5 text-dimmed flex-shrink-0 mt-0.5"
+            class="w-4 h-4 flex-shrink-0"
           />
-          <div>
-            <p class="font-medium text-highlighted">
-              {{ row.original.title || truncate(row.original.message, 80) }}
-            </p>
-            <p v-if="!row.original.title" class="text-sm text-muted mt-1">
-              {{ truncate(row.original.message, 120) }}
-            </p>
-          </div>
+          <UBadge
+            :color="getTopicColor(row.original.topic)"
+            variant="soft"
+            size="sm"
+          >
+            {{ row.original.topic }}
+          </UBadge>
+        </div>
+      </template>
+
+      <!-- Message — no icon, just text -->
+      <template #message-cell="{ row }">
+        <div>
+          <p class="font-medium text-highlighted">
+            {{ row.original.title || truncate(row.original.message, 80) }}
+          </p>
+          <p v-if="!row.original.title" class="text-sm text-muted mt-1">
+            {{ truncate(row.original.message, 120) }}
+          </p>
         </div>
       </template>
 
@@ -78,8 +78,8 @@ defineProps<{ messages: MessageResponse[] }>()
 defineEmits<{ select: [message: MessageResponse] }>()
 
 const columns = [
-  { accessorKey: 'priority', header: 'Priority', width: 100 },
-  { accessorKey: 'topic', header: 'Topic', width: 120 },
+  { accessorKey: 'priority', header: 'Priority', width: 60 },
+  { accessorKey: 'topic', header: 'Topic', width: 140 },
   { accessorKey: 'message', header: 'Message' },
   { accessorKey: 'time', header: 'Time', width: 150 },
   { accessorKey: 'tags', header: 'Tags', width: 150 }
@@ -117,7 +117,13 @@ const getPriorityLabel = (priority: number) => {
   return { 1: 'Min', 2: 'Low', 3: 'Default', 4: 'High', 5: 'Urgent' }[priority] || 'Default'
 }
 
-const getPriorityColor = (priority: number) => {
-  return { 1: 'gray', 2: 'blue', 3: 'green', 4: 'orange', 5: 'red' }[priority] || 'green'
+const getPriorityDotClass = (priority: number) => {
+  return {
+    1: 'bg-gray-400',
+    2: 'bg-blue-500',
+    3: 'bg-green-500',
+    4: 'bg-orange-500',
+    5: 'bg-red-500',
+  }[priority] || 'bg-green-500'
 }
 </script>

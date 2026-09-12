@@ -59,14 +59,15 @@ describe('MessageTable', () => {
     expect(screen.getAllByText('Backup Complete').length).toBeGreaterThan(0);
   });
 
-  it('shows priority labels', () => {
+  it('shows priority indicators via title attribute', () => {
     render(MessageTable, {
       props: { messages: mockMessages }
     });
 
-    expect(screen.getAllByText('Default').length).toBeGreaterThan(0);
-    expect(screen.getAllByText('High').length).toBeGreaterThan(0);
-    expect(screen.getAllByText('Low').length).toBeGreaterThan(0);
+    // Priority is now a colored dot with a title attribute
+    expect(screen.getAllByTitle('Default').length).toBeGreaterThan(0);
+    expect(screen.getAllByTitle('High').length).toBeGreaterThan(0);
+    expect(screen.getAllByTitle('Low').length).toBeGreaterThan(0);
   });
 
   it('displays topic badges', () => {
@@ -158,8 +159,8 @@ describe('MessageTable', () => {
       props: { messages: mockMessages }
     });
 
-    expect(screen.getAllByText('Default').length).toBeGreaterThan(0);
-    expect(screen.getAllByText('High').length).toBeGreaterThan(0);
-    expect(screen.getAllByText('Low').length).toBeGreaterThan(0);
+    expect(screen.getAllByTitle('Default').length).toBeGreaterThan(0);
+    expect(screen.getAllByTitle('High').length).toBeGreaterThan(0);
+    expect(screen.getAllByTitle('Low').length).toBeGreaterThan(0);
   });
 });
