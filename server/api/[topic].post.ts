@@ -1,10 +1,9 @@
 import { db, schema } from '@nuxthub/db';
 import { messageMetadataSchema, messageResponseSchema, type MessageMetadata, type RichMetadata } from '../schemas/message';
-import { appendFile, mkdir } from 'fs/promises';
-import { join, dirname } from 'path';
 import type { H3Event } from 'h3';
 import { toMessageResponse } from '../utils/messages';
 import { eq, desc } from 'drizzle-orm';
+import { consola } from 'consola';
 
 // Extract ntfy.sh-style headers from request
 function extractMetadata(event: H3Event): MessageMetadata {
@@ -157,22 +156,34 @@ export default defineEventHandler(async (event: H3Event) => {
       return { error: 'Topic is required' };
     }
 
-    const { dbPath } = useRuntimeConfig();
     const body = await readRawBody(event);
     const headers = getHeaders(event);
-
-    const logDir = dirname(dbPath);
-    await mkdir(logDir, { recursive: true });
-    const logFilePath = join(logDir, 'post-requests.log');
-    await appendFile(logFilePath, `[${new Date().toISOString()}] Headers: ${JSON.stringify(headers)}\nBody: ${body?.toString() || ''}\n\n`);
-
     const message = body?.toString() || '';
+
+    // Log the full notification at debug level for discovery and debugging.
+    // Enable by setting CONSOLA_LEVEL=4 (or higher) in the environment.
+    consola.debug('[AuditArr] Notification received:', {
+      topic,
+      headers,
+      body: message,
+    });
 
     // Extract ntfy.sh headers
     const metadata = extractMetadata(event);
 
+    // Log extracted metadata so we can discover new fields to support
+    consola.debug('[AuditArr] Extracted metadata:', {
+      topic,
+      metadata,
+    });
+
     // Validate metadata with Zod
     const validatedMetadata = messageMetadataSchema.parse(metadata);
+
+    consola.debug('[AuditArr] Validated metadata:', {
+      topic,
+      validatedMetadata,
+    });
 
     // Insert message with all persisted metadata
     await db.insert(schema.messages).values({
